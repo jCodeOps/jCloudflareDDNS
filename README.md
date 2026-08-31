@@ -16,7 +16,7 @@ The project is intentionally CLI-oriented and will begin with one-shot execution
 
 ## CLI foundation
 
-The current CLI exposes `--help`, `--version`, and the commands `check`, `update`, and `validate`. `validate` checks a local YAML configuration file, and `check` resolves the public IPv4 address and queries the configured Cloudflare record. `update` remains a placeholder; no command updates DNS records automatically.
+The current CLI exposes `--help`, `--version`, and the commands `check`, `update`, and `validate`. `validate` checks a local YAML configuration file, `check` resolves the configured public IP version and queries the matching Cloudflare record, and `update` performs a one-shot DNS update when the addresses differ. `update` is a dry run by default; pass `--apply` to write to Cloudflare.
 
 An example non-secret configuration is:
 
@@ -27,11 +27,12 @@ ttl: 300
 proxied: false
 tokenEnv: CLOUDFLARE_API_TOKEN
 ipProviderUrl: https://api.ipify.org
+ipVersion: ipv4
 ```
 
 The configuration can be validated with `jcloudflareddns validate --config config.yml` when running the CLI. The `tokenEnv` value names an environment variable for future stages; Stage 2 does not read or use that variable. Never place a token in the YAML file.
 
-Future stages may add automatic DNS updates, IPv6 support, logging, scheduling, and packaging. None of those features should be assumed available in this release.
+Future stages may add logging, scheduling, daemon mode, and packaging. None of those features should be assumed available in this release.
 
 ## Development
 

@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.proactiveidea.jcloudflareddns.network.IpVersion;
+
 /** Performs deterministic validation without reading secrets or using the network. */
 public final class ConfigurationValidator {
 
@@ -48,6 +50,11 @@ public final class ConfigurationValidator {
             errors.add("tokenEnv must be a valid uppercase environment variable name.");
         }
         validateIpProviderUrl(configuration.ipProviderUrl(), errors);
+        try {
+            IpVersion.fromConfiguration(configuration.ipVersion());
+        } catch (IllegalArgumentException exception) {
+            errors.add("ipVersion must be either ipv4 or ipv6.");
+        }
         return List.copyOf(errors);
     }
 

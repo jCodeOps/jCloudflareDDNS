@@ -23,6 +23,7 @@ import com.proactiveidea.jcloudflareddns.api.DnsRecord;
 import com.proactiveidea.jcloudflareddns.api.EnvironmentApiTokenProvider;
 import com.proactiveidea.jcloudflareddns.api.Zone;
 import com.proactiveidea.jcloudflareddns.network.IpAddress;
+import com.proactiveidea.jcloudflareddns.network.IpVersion;
 import com.proactiveidea.jcloudflareddns.network.PublicIpException;
 import com.proactiveidea.jcloudflareddns.network.PublicIpResolver;
 
@@ -51,12 +52,15 @@ public final class CheckCommand implements Callable<Integer> {
                 return ExitCodes.VALIDATION_ERROR;
             }
 
-            PublicIpResolver ipResolver = new PublicIpResolver(URI.create(configuration.ipProviderUrl()));
+            IpVersion ipVersion = IpVersion.fromConfiguration(configuration.ipVersion());
+            PublicIpResolver ipResolver = new PublicIpResolver(
+                    URI.create(configuration.ipProviderUrl()), ipVersion);
             CloudflareApiClient cloudflare = new CloudflareHttpClient(
                     new EnvironmentApiTokenProvider(configuration.tokenEnv()));
             IpAddress publicIp = ipResolver.resolve();
             Zone zone = cloudflare.findZone(configuration.zone());
-            var records = cloudflare.listRecords(zone.id(), configuration.record(), "A");
+            var records = cloudflare.listRecords(
+                    zone.id(), configuration.record(), ipVersion.recordType());
             if (records.isEmpty()) {
                 errorOut("No A record was found for the configured hostname.");
                 return ExitCodes.API_ERROR;
@@ -67,7 +71,7 @@ public final class CheckCommand implements Callable<Integer> {
             }
 
             DnsRecord record = records.getFirst();
-            if (publicIp.value().equals(record.content())) {
+            if (publicIp.value().equals(IpAddress.parse(record.content(), ipVersion).value())) {
                 spec.commandLine().getOut().printf("DNS record is up to date: %s%n", publicIp.value());
                 return ExitCodes.SUCCESS;
             }
@@ -90,6 +94,9 @@ public final class CheckCommand implements Callable<Integer> {
             }
             errorOut("Cloudflare API error: " + exception.getMessage());
             return exception.statusCode() == 0 ? ExitCodes.NETWORK_ERROR : ExitCodes.API_ERROR;
+        } catch (IllegalArgumentException exception) {
+            errorOut("Cloudflare API returned an invalid IP record.");
+            return ExitCodes.API_ERROR;
         }
     }
 

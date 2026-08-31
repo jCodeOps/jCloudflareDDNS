@@ -52,6 +52,18 @@ class PublicIpResolverTest {
     }
 
     @Test
+    void resolvesAndNormalizesAValidIpv6Response() throws Exception {
+        responseBody = "2001:0db8:0:0:0:0:0:1\n";
+
+        IpAddress address = new PublicIpResolver(
+                java.net.http.HttpClient.newHttpClient(),
+                java.net.URI.create("http://localhost:" + server.getAddress().getPort() + "/ip"),
+                IpVersion.IPV6).resolve();
+
+        assertEquals("2001:db8::1", address.value());
+    }
+
+    @Test
     void rejectsAnInvalidIpv4Response() {
         responseBody = "not-an-ip\n";
 
@@ -71,6 +83,9 @@ class PublicIpResolverTest {
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("01.2.3.4"));
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("256.2.3.4"));
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("2001:db8::1"));
+        assertEquals("2001:db8::1", IpAddress.parse("2001:0DB8:0:0:0:0:0:1", IpVersion.IPV6).value());
+        assertThrows(IllegalArgumentException.class,
+                () -> IpAddress.parse("2001:db8:0:0:0:0:0", IpVersion.IPV6));
     }
 
     private PublicIpResolver resolver() {

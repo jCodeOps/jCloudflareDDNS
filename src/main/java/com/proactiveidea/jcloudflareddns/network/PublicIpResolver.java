@@ -27,14 +27,24 @@ public final class PublicIpResolver {
 
     private final HttpClient httpClient;
     private final URI providerUri;
+    private final IpVersion ipVersion;
 
     public PublicIpResolver(URI providerUri) {
-        this(HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build(), providerUri);
+        this(providerUri, IpVersion.IPV4);
+    }
+
+    public PublicIpResolver(URI providerUri, IpVersion ipVersion) {
+        this(HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build(), providerUri, ipVersion);
     }
 
     public PublicIpResolver(HttpClient httpClient, URI providerUri) {
+        this(httpClient, providerUri, IpVersion.IPV4);
+    }
+
+    public PublicIpResolver(HttpClient httpClient, URI providerUri, IpVersion ipVersion) {
         this.httpClient = Objects.requireNonNull(httpClient, "httpClient");
         this.providerUri = validateUri(Objects.requireNonNull(providerUri, "providerUri"));
+        this.ipVersion = Objects.requireNonNull(ipVersion, "ipVersion");
     }
 
     public IpAddress resolve() throws PublicIpException {
@@ -50,7 +60,7 @@ public final class PublicIpResolver {
                 throw new PublicIpException("Public IP provider returned an unsuccessful response.");
             }
             try {
-                return IpAddress.parse(response.body());
+                return IpAddress.parse(response.body(), ipVersion);
             } catch (IllegalArgumentException exception) {
                 throw new PublicIpException("Public IP provider returned an invalid IPv4 address.", exception);
             }

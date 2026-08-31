@@ -18,13 +18,15 @@ public record Configuration(
         Integer ttl,
         Boolean proxied,
         String tokenEnv,
-        String ipProviderUrl) {
+        String ipProviderUrl,
+        String ipVersion) {
 
     public Configuration {
         zone = trimToNull(zone);
         record = trimToNull(record);
         tokenEnv = trimToNull(tokenEnv);
         ipProviderUrl = trimToNull(ipProviderUrl);
+        ipVersion = ipVersion == null || ipVersion.isBlank() ? "ipv4" : ipVersion.trim().toLowerCase();
         proxied = proxied == null ? Boolean.FALSE : proxied;
     }
 
