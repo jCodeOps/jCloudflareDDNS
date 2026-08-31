@@ -36,7 +36,7 @@ Future stages may add logging, scheduling, daemon mode, and packaging. None of t
 
 ## Development
 
-Install JDK 25 and follow the [installation guide](docs/installation.md), then run `./mvnw clean verify`. The minimal entry point can be checked with `java -cp target/classes com.proactiveidea.jcloudflareddns.JCloudflareDdnsApplication` when its runtime dependencies are available on the classpath.
+Install JDK 25 and follow the [installation guide](docs/installation.md), then run `./mvnw clean verify`. `./mvnw package` also creates portable `tar.gz` and `zip` distribution archives under `target/`.
 
 ## License and independence
 

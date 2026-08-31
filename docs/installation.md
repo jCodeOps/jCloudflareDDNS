@@ -4,6 +4,8 @@
 
 No native installer or operating-system package is published yet. The supported installation method during early development is a source checkout built with JDK 25 and the Maven Wrapper. The application is a one-shot CLI and does not require a service manager.
 
+Stage 9 also produces a portable distribution archive during `package`. It contains the application, runtime dependencies, and a POSIX launcher; it does not install files into system directories.
+
 ## FreeBSD
 
 FreeBSD is the first platform validation target. Install OpenJDK 25 using the system's supported package method, then build the project:
@@ -12,7 +14,10 @@ FreeBSD is the first platform validation target. Install OpenJDK 25 using the sy
 git clone https://github.com/jCodeOps/jCloudflareDDNS.git
 cd jCloudflareDDNS
 ./mvnw clean verify
+./mvnw package
 ```
+
+After extracting the generated `target/jcloudflareddns-0.1.0-SNAPSHOT-distribution.tar.gz`, run `bin/jcloudflareddns --help` from the extracted directory. The launcher uses `JAVA_HOME` when set, otherwise it resolves `java` from `PATH`.
 
 Run the application from the compiled classes as documented in the root README. Keep the checkout in a directory owned by the operator or a dedicated service account. Do not place API Tokens in the checkout.
 

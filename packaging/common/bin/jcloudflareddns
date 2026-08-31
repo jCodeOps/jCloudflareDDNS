@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+APP_HOME=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+
+if [ -n "${JAVA_HOME:-}" ]; then
+    JAVA_BIN="$JAVA_HOME/bin/java"
+else
+    JAVA_BIN=java
+fi
+
+exec "$JAVA_BIN" -cp "$APP_HOME/lib/*" \
+    com.proactiveidea.jcloudflareddns.JCloudflareDdnsApplication "$@"
