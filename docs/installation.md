@@ -19,6 +19,14 @@ cd jCloudflareDDNS
 
 After extracting the generated `target/jcloudflareddns-0.1.0-SNAPSHOT-distribution.tar.gz`, run `bin/jcloudflareddns --help` from the extracted directory. The launcher uses `JAVA_HOME` when set, otherwise it resolves `java` from `PATH`.
 
+For a FreeBSD installation under a chosen prefix, run the repository installer as root:
+
+```sh
+sh packaging/freebsd/install.sh target/jcloudflareddns-0.1.0-SNAPSHOT-distribution.tar.gz /usr/local
+```
+
+The installer refuses to overwrite an existing version or launcher. It installs the archive under `share/`, creates a launcher under `bin/`, and creates an empty configuration directory with restrictive permissions. It never creates or copies a configuration file or API Token.
+
 Run the application from the compiled classes as documented in the root README. Keep the checkout in a directory owned by the operator or a dedicated service account. Do not place API Tokens in the checkout.
 
 ## Linux
