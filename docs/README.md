@@ -1,3 +1,5 @@
 # Documentation
 
-Project design notes and user documentation will be added here in future stages.
+Project design notes and platform documentation belong here.
+
+- [Platform support](platform-support.md)

@@ -33,7 +33,7 @@ import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-/** Updates the configured A record when its public IPv4 address changes. */
+/** Updates the configured DNS record when its public IP address changes. */
 @Command(name = "update", description = "Update a DNS record.")
 public final class UpdateCommand implements Callable<Integer> {
 
