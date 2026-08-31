@@ -11,17 +11,30 @@
 
 package com.proactiveidea.jcloudflareddns;
 
+import java.io.PrintWriter;
+import java.util.Arrays;
+
+import picocli.CommandLine;
+
 /**
  * Minimal entry point for the Stage 0 project foundation.
  */
 public final class JCloudflareDdnsApplication {
 
-    private static final String VERSION = "0.1.0-SNAPSHOT";
+    public static final String VERSION = "0.1.0-SNAPSHOT";
 
     private JCloudflareDdnsApplication() {
     }
 
     public static void main(String[] args) {
-        System.out.println("jCloudflareDDNS " + VERSION + " - early development");
+        System.exit(execute(args, new PrintWriter(System.out, true), new PrintWriter(System.err, true)));
+    }
+
+    /** Executes the CLI without terminating the hosting process. */
+    public static int execute(String[] args, PrintWriter out, PrintWriter err) {
+        CommandLine commandLine = new CommandLine(new JCloudflareDdnsCommand());
+        commandLine.setOut(out);
+        commandLine.setErr(err);
+        return commandLine.execute(Arrays.copyOf(args, args.length));
     }
 }

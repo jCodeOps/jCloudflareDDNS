@@ -1,6 +1,6 @@
 # jCloudflareDDNS
 
-> Early development — Stage 0 foundation only. Functional DDNS behavior is not implemented yet.
+> Early development — Stage 1 CLI foundation. Functional DDNS behavior is not implemented yet.
 
 jCloudflareDDNS is planned as a secure, lightweight, cross-platform Dynamic DNS client for Cloudflare, written in modern Java. It will focus on updating Cloudflare DNS records safely when a host's public IP changes, while keeping configuration explicit and credentials protected.
 
@@ -14,7 +14,11 @@ The project is intentionally CLI-oriented and will begin with one-shot execution
 - Cloudflare API Tokens with least privilege; Global API Keys will not be used in new functionality
 - No Spring, web server, database, or dependency-injection framework
 
-Future stages may add CLI commands, YAML configuration, Cloudflare API integration, logging, scheduling, and packaging. None of those features should be assumed available in this release.
+## CLI foundation
+
+The current CLI exposes `--help`, `--version`, and the placeholder commands `check`, `update`, and `validate`. The commands are recognized and return defined exit codes, but they do not yet load configuration, access Cloudflare, resolve public IP addresses, or update DNS records.
+
+Future stages may add configuration, Cloudflare API integration, logging, scheduling, and packaging. None of those features should be assumed available in this release.
 
 ## Development
 
