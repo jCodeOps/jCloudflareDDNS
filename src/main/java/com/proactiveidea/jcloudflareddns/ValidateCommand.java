@@ -11,22 +11,38 @@
 
 package com.proactiveidea.jcloudflareddns;
 
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-/** Stage 1 placeholder for validating application configuration. */
+/** Validates a local application configuration file. */
 @Command(name = "validate", description = "Validate the application configuration.")
 public final class ValidateCommand implements Callable<Integer> {
+
+    @Option(names = {"-c", "--config"}, required = true, description = "Path to the YAML configuration file.")
+    private Path configPath;
 
     @Spec
     private CommandSpec spec;
 
     @Override
     public Integer call() {
-        spec.commandLine().getErr().println("The 'validate' command is not implemented yet.");
-        return ExitCodes.NOT_IMPLEMENTED;
+        try {
+            Configuration configuration = new ConfigurationLoader().load(configPath);
+            var errors = new ConfigurationValidator().validate(configuration);
+            if (!errors.isEmpty()) {
+                errors.forEach(error -> spec.commandLine().getErr().println("Error: " + error));
+                return ExitCodes.VALIDATION_ERROR;
+            }
+            spec.commandLine().getOut().println("Configuration is valid.");
+            return ExitCodes.SUCCESS;
+        } catch (ConfigurationException exception) {
+            spec.commandLine().getErr().println("Error: " + exception.getMessage());
+            return ExitCodes.VALIDATION_ERROR;
+        }
     }
 }

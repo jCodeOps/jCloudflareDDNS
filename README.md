@@ -16,7 +16,19 @@ The project is intentionally CLI-oriented and will begin with one-shot execution
 
 ## CLI foundation
 
-The current CLI exposes `--help`, `--version`, and the placeholder commands `check`, `update`, and `validate`. The commands are recognized and return defined exit codes, but they do not yet load configuration, access Cloudflare, resolve public IP addresses, or update DNS records.
+The current CLI exposes `--help`, `--version`, and the commands `check`, `update`, and `validate`. `validate` can validate a local YAML configuration file; the other commands remain placeholders. No command accesses Cloudflare, resolves public IP addresses, or updates DNS records.
+
+An example non-secret configuration is:
+
+```yaml
+zone: example.com
+record: host.example.com
+ttl: 300
+proxied: false
+tokenEnv: CLOUDFLARE_API_TOKEN
+```
+
+The configuration can be validated with `jcloudflareddns validate --config config.yml` when running the CLI. The `tokenEnv` value names an environment variable for future stages; Stage 2 does not read or use that variable. Never place a token in the YAML file.
 
 Future stages may add configuration, Cloudflare API integration, logging, scheduling, and packaging. None of those features should be assumed available in this release.
 

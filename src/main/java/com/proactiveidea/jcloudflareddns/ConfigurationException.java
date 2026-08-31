@@ -1,0 +1,26 @@
+/*
+ * Copyright 2026 Proactive Idea
+ * Author: Jenny Cabrera Varona
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+package com.proactiveidea.jcloudflareddns;
+
+/** Raised when a configuration file cannot be read or parsed safely. */
+public final class ConfigurationException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public ConfigurationException(String message) {
+        super(message);
+    }
+
+    public ConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

@@ -18,6 +18,7 @@ public final class ExitCodes {
     public static final int FAILURE = 1;
     public static final int USAGE_ERROR = 2;
     public static final int NOT_IMPLEMENTED = 3;
+    public static final int VALIDATION_ERROR = 4;
 
     private ExitCodes() {
     }

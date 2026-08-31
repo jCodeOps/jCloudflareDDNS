@@ -10,6 +10,8 @@ Never include real Cloudflare API Tokens, Global API Keys, credentials, or other
 
 Use least-privilege Cloudflare API Tokens and keep secrets separate from non-sensitive configuration. Store local secrets in environment variables or ignored local files. The application must never print or log secrets.
 
+Configuration files may contain the name of a token environment variable, such as `CLOUDFLARE_API_TOKEN`, but must not contain the token value itself. Stage 2 validation rejects common embedded secret fields.
+
 ## Supported versions
 
 No stable release exists yet. Security support and a formal supported-version policy will be established before the first stable release.

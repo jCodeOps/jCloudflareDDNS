@@ -42,12 +42,20 @@ class JCloudflareDdnsApplicationTest {
 
     @Test
     void stageOneCommandsAreRecognizedButNotImplemented() {
-        for (String command : new String[]{"check", "update", "validate"}) {
+        for (String command : new String[]{"check", "update"}) {
             CliResult result = execute(command);
 
             assertEquals(ExitCodes.NOT_IMPLEMENTED, result.exitCode(), command);
             assertTrue(result.stderr().contains("not implemented"), command);
         }
+    }
+
+    @Test
+    void validateRequiresAConfigurationPath() {
+        CliResult result = execute("validate");
+
+        assertEquals(ExitCodes.USAGE_ERROR, result.exitCode());
+        assertTrue(result.stderr().contains("Missing required option"));
     }
 
     @Test

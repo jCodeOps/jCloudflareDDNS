@@ -17,7 +17,7 @@ import java.util.Arrays;
 import picocli.CommandLine;
 
 /**
- * Minimal entry point for the Stage 0 project foundation.
+ * Entry point for the jCloudflareDDNS command-line application.
  */
 public final class JCloudflareDdnsApplication {
 
