@@ -27,6 +27,8 @@ sh packaging/freebsd/install.sh target/jcloudflareddns-0.1.0-SNAPSHOT-distributi
 
 The installer refuses to overwrite an existing version or launcher. It installs the archive under `share/`, creates a launcher under `bin/`, and creates an empty configuration directory with restrictive permissions. It never creates or copies a configuration file or API Token.
 
+On FreeBSD, a package archive can be created from the distribution with `packaging/freebsd/create-package.sh`. Package creation is separate from installation and does not require Cloudflare credentials. The package is intended for the current development baseline and requires Java 25 on the target host.
+
 Run the application from the compiled classes as documented in the root README. Keep the checkout in a directory owned by the operator or a dedicated service account. Do not place API Tokens in the checkout.
 
 ## Linux

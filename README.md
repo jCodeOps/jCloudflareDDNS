@@ -1,6 +1,6 @@
 # jCloudflareDDNS
 
-> Early development — Stage 10 complete. The one-shot CLI foundation and initial DNS update flow are under active development.
+> Early development — Stage 12 complete. The one-shot CLI foundation and initial DNS update flow are under active development.
 
 jCloudflareDDNS is planned as a secure, lightweight, cross-platform Dynamic DNS client for Cloudflare, written in modern Java. It will focus on updating Cloudflare DNS records safely when a host's public IP changes, while keeping configuration explicit and credentials protected.
 

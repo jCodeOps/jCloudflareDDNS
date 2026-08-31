@@ -13,3 +13,13 @@ Stage 10 adds `install.sh` for manual installation. It requires root, accepts an
 ```sh
 sh packaging/freebsd/install.sh jcloudflareddns-0.1.0-SNAPSHOT-distribution.tar.gz /usr/local
 ```
+
+Stage 12 adds `create-package.sh`, which creates a FreeBSD `.pkg` archive from the distribution. It requires the FreeBSD `pkg` command and does not install anything or create a service:
+
+```sh
+sh packaging/freebsd/create-package.sh \
+    jcloudflareddns-0.1.0-SNAPSHOT-distribution.tar.gz packages
+pkg add packages/jcloudflareddns-0.1.0.pkg
+```
+
+The package requires Java 25, installs the launcher under `/usr/local/bin`, and keeps the versioned application under `/usr/local/share`.
