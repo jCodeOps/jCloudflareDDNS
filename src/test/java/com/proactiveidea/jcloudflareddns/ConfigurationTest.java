@@ -39,6 +39,7 @@ class ConfigurationTest {
                 ttl: 300
                 proxied: false
                 tokenEnv: CLOUDFLARE_API_TOKEN
+                ipProviderUrl: https://api.ipify.org
                 """);
 
         Configuration configuration = new ConfigurationLoader().load(path);
@@ -58,6 +59,7 @@ class ConfigurationTest {
                 record: other.net
                 ttl: 0
                 tokenEnv: lowercase-name
+                ipProviderUrl: https://api.ipify.org
                 """);
 
         Configuration configuration = new ConfigurationLoader().load(path);
@@ -94,6 +96,7 @@ class ConfigurationTest {
                 record: host.example.com
                 ttl: 300
                 tokenEnv: CLOUDFLARE_API_TOKEN
+                ipProviderUrl: https://api.ipify.org
                 unsupported: true
                 """);
 
@@ -107,6 +110,7 @@ class ConfigurationTest {
                 record: host.example.com
                 ttl: 300
                 tokenEnv: CLOUDFLARE_API_TOKEN
+                ipProviderUrl: https://api.ipify.org
                 """);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -126,6 +130,7 @@ class ConfigurationTest {
                 record: other.net
                 ttl: 0
                 tokenEnv: invalid-name
+                ipProviderUrl: https://api.ipify.org
                 """);
 
         int exitCode = JCloudflareDdnsApplication.execute(

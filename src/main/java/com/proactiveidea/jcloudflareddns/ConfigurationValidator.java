@@ -11,6 +11,7 @@
 
 package com.proactiveidea.jcloudflareddns;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -46,7 +47,26 @@ public final class ConfigurationValidator {
         } else if (!ENVIRONMENT_VARIABLE.matcher(configuration.tokenEnv()).matches()) {
             errors.add("tokenEnv must be a valid uppercase environment variable name.");
         }
+        validateIpProviderUrl(configuration.ipProviderUrl(), errors);
         return List.copyOf(errors);
+    }
+
+    private static void validateIpProviderUrl(String value, List<String> errors) {
+        if (value == null) {
+            errors.add("ipProviderUrl is required.");
+            return;
+        }
+        try {
+            URI uri = URI.create(value);
+            if (!"https".equalsIgnoreCase(uri.getScheme())
+                    || uri.getHost() == null
+                    || uri.getRawQuery() != null
+                    || uri.getRawFragment() != null) {
+                errors.add("ipProviderUrl must be an HTTPS URL without a query or fragment.");
+            }
+        } catch (IllegalArgumentException exception) {
+            errors.add("ipProviderUrl must be a valid HTTPS URL.");
+        }
     }
 
     private static void validateDomain(String field, String value, List<String> errors) {

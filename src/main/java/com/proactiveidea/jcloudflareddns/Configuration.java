@@ -17,12 +17,14 @@ public record Configuration(
         String record,
         Integer ttl,
         Boolean proxied,
-        String tokenEnv) {
+        String tokenEnv,
+        String ipProviderUrl) {
 
     public Configuration {
         zone = trimToNull(zone);
         record = trimToNull(record);
         tokenEnv = trimToNull(tokenEnv);
+        ipProviderUrl = trimToNull(ipProviderUrl);
         proxied = proxied == null ? Boolean.FALSE : proxied;
     }
 

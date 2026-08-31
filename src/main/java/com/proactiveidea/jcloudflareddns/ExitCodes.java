@@ -19,6 +19,9 @@ public final class ExitCodes {
     public static final int USAGE_ERROR = 2;
     public static final int NOT_IMPLEMENTED = 3;
     public static final int VALIDATION_ERROR = 4;
+    public static final int AUTHENTICATION_ERROR = 5;
+    public static final int NETWORK_ERROR = 6;
+    public static final int API_ERROR = 7;
 
     private ExitCodes() {
     }
