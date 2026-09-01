@@ -13,7 +13,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -38,6 +40,8 @@ public final class ConfigCommand implements Callable<Integer> {
     @Command(name = "init", mixinStandardHelpOptions = true,
             description = "Create a non-secret configuration template.")
     static final class ConfigInitCommand implements Callable<Integer> {
+
+        private static final Pattern PROFILE_NAME = Pattern.compile("[A-Za-z0-9][A-Za-z0-9_-]*");
 
         @Option(names = {"-o", "--output"}, arity = "0..1", fallbackValue = "config.yml",
                 description = "Output YAML path (default: config.yml).")
@@ -81,15 +85,14 @@ public final class ConfigCommand implements Callable<Integer> {
         }
 
         private void validateInput() {
-            requireSingleLine(profile, "profile");
-            requireSingleLine(zone, "zone");
-            requireSingleLine(record, "record");
-            requireSingleLine(tokenEnv, "token-env");
-        }
-
-        private static void requireSingleLine(String value, String name) {
-            if (value == null || value.isBlank() || value.contains("\n") || value.contains("\r")) {
-                throw new IllegalArgumentException(name + " must be a non-empty single-line value.");
+            if (profile == null || !PROFILE_NAME.matcher(profile).matches()) {
+                throw new IllegalArgumentException(
+                        "profile must contain only letters, digits, hyphens, and underscores.");
+            }
+            List<String> errors = new ConfigurationValidator().validate(new Configuration(
+                    zone, record, 300, false, tokenEnv, List.of(), true, "ipv4"));
+            if (!errors.isEmpty()) {
+                throw new IllegalArgumentException(errors.getFirst());
             }
         }
 

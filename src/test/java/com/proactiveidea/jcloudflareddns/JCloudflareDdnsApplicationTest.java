@@ -92,6 +92,18 @@ class JCloudflareDdnsApplicationTest {
         assertTrue(!config.contains("apiToken:"));
     }
 
+    @Test
+    void configInitRejectsUnsafeYamlInputWithoutCreatingAFile() {
+        Path output = temporaryDirectory.resolve("config.yml");
+
+        CliResult result = execute("config", "init", "--output", output.toString(),
+                "--profile", "home: injected");
+
+        assertEquals(ExitCodes.FAILURE, result.exitCode());
+        assertTrue(result.stderr().contains("profile must contain only"));
+        assertTrue(Files.notExists(output));
+    }
+
     private static CliResult execute(String... args) {
         ByteArrayOutputStream stdout = new ByteArrayOutputStream();
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();

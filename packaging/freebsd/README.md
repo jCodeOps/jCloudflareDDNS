@@ -2,7 +2,7 @@
 
 FreeBSD is the first platform validation target for jCloudflareDDNS.
 
-No native package, service script, or daemon integration exists yet. Until packaging is introduced, run the one-shot CLI directly with Java 25 and the Maven Wrapper. Future packaging must preserve portable paths, explicit permissions, API Token isolation, and the CLI's exit-code contract.
+No native executable, service script, or daemon integration exists yet. The project provides a portable distribution archive, a manual installer, and a development FreeBSD `.pkg` builder; all require Java 25. Future packaging must preserve portable paths, explicit permissions, API Token isolation, and the CLI's exit-code contract.
 
 The current manual installation procedure is documented in [`docs/installation.md`](../../docs/installation.md). A future FreeBSD package may provide an installed launcher and fixed filesystem layout, but it must not require Linux utilities or systemd.
 
@@ -23,3 +23,4 @@ pkg add packages/jcloudflareddns-0.1.0.pkg
 ```
 
 The package requires Java 25, installs the launcher under `/usr/local/bin`, and keeps the versioned application under `/usr/local/share`.
+Both FreeBSD scripts verify that the archive has the expected single-root layout before extracting it.

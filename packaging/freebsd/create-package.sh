@@ -23,13 +23,44 @@ if ! command -v pkg >/dev/null 2>&1; then
     exit 1
 fi
 
-archive_root=$(tar -tzf "$archive" | head -n 1 | cut -d/ -f1)
-if [ -z "$archive_root" ] || [ "$archive_root" = "." ]; then
-    echo "Distribution archive has an invalid layout." >&2
-    exit 1
-fi
+validate_archive() {
+    if ! archive_listing=$(tar -tzf "$archive"); then
+        echo "Distribution archive could not be read." >&2
+        exit 1
+    fi
+    archive_root=$(printf '%s\n' "$archive_listing" | awk -F/ 'NF { print $1; exit }')
+    case "$archive_root" in
+        jcloudflareddns-*) ;;
+        *)
+            echo "Distribution archive has an unsafe or invalid layout." >&2
+            exit 1
+            ;;
+    esac
+    if ! printf '%s\n' "$archive_listing" | awk -v root="$archive_root" '
+        NF == 0 { next }
+        $0 ~ /^\// || $0 ~ /(^|\/)\.\.(\/|$)/ { invalid = 1; exit }
+        $0 != root && index($0, root "/") != 1 { invalid = 1; exit }
+        { seen = 1 }
+        END { if (invalid || !seen) exit 1 }
+    '; then
+        echo "Distribution archive has an unsafe or invalid layout." >&2
+        exit 1
+    fi
+    if ! printf '%s\n' "$archive_listing" | grep -F -x "$archive_root/bin/jcloudflareddns" >/dev/null; then
+        echo "Distribution archive has an unsafe or invalid layout." >&2
+        exit 1
+    fi
+}
+
+validate_archive
 
 package_version=${JCDDNS_PACKAGE_VERSION:-0.1.0}
+case "$package_version" in
+    ''|*[!A-Za-z0-9.+_-]*)
+        echo "Package version contains unsupported characters." >&2
+        exit 1
+        ;;
+esac
 stage_dir=$(mktemp -d "${TMPDIR:-/tmp}/jcloudflareddns-package.XXXXXXXX")
 trap 'rm -rf "$stage_dir"' EXIT HUP INT TERM
 

@@ -24,11 +24,36 @@ if [ ! -f "$archive" ]; then
     exit 1
 fi
 
-archive_root=$(tar -tzf "$archive" | head -n 1 | cut -d/ -f1)
-if [ -z "$archive_root" ] || [ "$archive_root" = "." ]; then
-    echo "Distribution archive has an invalid layout." >&2
-    exit 1
-fi
+validate_archive() {
+    if ! archive_listing=$(tar -tzf "$archive"); then
+        echo "Distribution archive could not be read." >&2
+        exit 1
+    fi
+    archive_root=$(printf '%s\n' "$archive_listing" | awk -F/ 'NF { print $1; exit }')
+    case "$archive_root" in
+        jcloudflareddns-*) ;;
+        *)
+            echo "Distribution archive has an unsafe or invalid layout." >&2
+            exit 1
+            ;;
+    esac
+    if ! printf '%s\n' "$archive_listing" | awk -v root="$archive_root" '
+        NF == 0 { next }
+        $0 ~ /^\// || $0 ~ /(^|\/)\.\.(\/|$)/ { invalid = 1; exit }
+        $0 != root && index($0, root "/") != 1 { invalid = 1; exit }
+        { seen = 1 }
+        END { if (invalid || !seen) exit 1 }
+    '; then
+        echo "Distribution archive has an unsafe or invalid layout." >&2
+        exit 1
+    fi
+    if ! printf '%s\n' "$archive_listing" | grep -F -x "$archive_root/bin/jcloudflareddns" >/dev/null; then
+        echo "Distribution archive has an unsafe or invalid layout." >&2
+        exit 1
+    fi
+}
+
+validate_archive
 
 share_dir="$prefix/share"
 install_dir="$share_dir/$archive_root"
