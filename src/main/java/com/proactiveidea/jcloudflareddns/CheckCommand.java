@@ -46,6 +46,18 @@ public final class CheckCommand implements Callable<Integer> {
     @Spec
     private CommandSpec spec;
 
+    private final PublicIpResolver injectedIpResolver;
+    private final CloudflareApiClient injectedCloudflareClient;
+
+    public CheckCommand() {
+        this(null, null);
+    }
+
+    CheckCommand(PublicIpResolver ipResolver, CloudflareApiClient cloudflareClient) {
+        injectedIpResolver = ipResolver;
+        injectedCloudflareClient = cloudflareClient;
+    }
+
     @Override
     public Integer call() {
         try (ExecutionLock executionLock = ExecutionLock.acquire(configPath)) {
@@ -82,12 +94,15 @@ public final class CheckCommand implements Callable<Integer> {
                 return ExitCodes.VALIDATION_ERROR;
             }
             IpVersion ipVersion = IpVersion.fromConfiguration(configuration.ipVersion());
-            PublicIpResolver ipResolver = new PublicIpResolver(
-                    java.net.http.HttpClient.newHttpClient(),
-                    PublicIpProviders.select(configuration.ipProviderUrls(),
-                            configuration.useDefaultIpProviders(), ipVersion), ipVersion);
-            CloudflareApiClient cloudflare = new CloudflareHttpClient(
-                    new EnvironmentApiTokenProvider(configuration.tokenEnv()));
+            PublicIpResolver ipResolver = injectedIpResolver != null
+                    ? injectedIpResolver
+                    : new PublicIpResolver(
+                            java.net.http.HttpClient.newHttpClient(),
+                            PublicIpProviders.select(configuration.ipProviderUrls(),
+                                    configuration.useDefaultIpProviders(), ipVersion), ipVersion);
+            CloudflareApiClient cloudflare = injectedCloudflareClient != null
+                    ? injectedCloudflareClient
+                    : new CloudflareHttpClient(new EnvironmentApiTokenProvider(configuration.tokenEnv()));
             IpAddress publicIp = ipResolver.resolve();
             Zone zone = cloudflare.findZone(configuration.zone());
             var records = cloudflare.listRecords(zone.id(), configuration.record(), ipVersion.recordType());

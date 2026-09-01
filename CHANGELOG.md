@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Added direct CLI coverage for matching and differing DNS check results.
 - Added bounded retries for transient read-only Cloudflare API failures.
 - Bounded Cloudflare and public IP HTTP response bodies to limit memory use.
 - Added bounded Cloudflare API pagination for zone and DNS record lookups.
