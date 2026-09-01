@@ -126,6 +126,41 @@ class UpdateCommandTest {
         assertTrue(output.contains("Profile 'office':"));
     }
 
+    @Test
+    void dryRunProcessesAllProfilesInParallelWhenConfigured() throws Exception {
+        Path config = Files.writeString(temporaryDirectory.resolve("parallel.yml"), """
+                execution:
+                  mode: parallel
+                  maxConcurrency: 2
+                profiles:
+                  home:
+                    zone: example.com
+                    record: home.example.com
+                    ttl: 300
+                    tokenEnv: CLOUDFLARE_HOME_TOKEN
+                  office:
+                    zone: example.net
+                    record: office.example.net
+                    ttl: 600
+                    tokenEnv: CLOUDFLARE_OFFICE_TOKEN
+                """, StandardCharsets.UTF_8);
+        RecordingCloudflareClient cloudflare = new RecordingCloudflareClient("198.51.100.10");
+        PublicIpResolver resolver = new PublicIpResolver(
+                java.net.http.HttpClient.newHttpClient(),
+                URI.create("http://localhost:" + server.getAddress().getPort() + "/ip"));
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+
+        int exitCode = new CommandLine(new UpdateCommand(resolver, cloudflare))
+                .setOut(new PrintWriter(stdout, true))
+                .setErr(new PrintWriter(stderr, true))
+                .execute("--config", config.toString(), "--all");
+
+        assertEquals(ExitCodes.SUCCESS, exitCode);
+        assertTrue(stdout.toString(StandardCharsets.UTF_8).contains("Profile 'home':"));
+        assertTrue(stdout.toString(StandardCharsets.UTF_8).contains("Profile 'office':"));
+    }
+
     private Path configuration() throws IOException {
         return Files.writeString(temporaryDirectory.resolve("config.yml"), """
                 zone: example.com

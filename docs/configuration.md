@@ -74,14 +74,14 @@ profiles:
 Run a selected profile with `--profile home`, or validate every profile with
 `--all`. Profile values override defaults; omitted values inherit them. A
 multi-profile file must name the profile explicitly unless `--all` is used for
-validation. Network execution of all profiles is now sequential. Bounded
-parallelism will be added in a later phase.
+validation. Network execution of all profiles supports sequential mode and
+bounded parallel mode.
 
 ```yaml
 execution:
   mode: sequential
 ```
 
-Use `mode: parallel` with an optional `maxConcurrency` from 1 through 16 when
-parallel execution becomes available. Sequential mode does not need a
+Use `mode: parallel` with an optional `maxConcurrency` from 1 through 16.
+When omitted, parallel mode uses two workers. Sequential mode does not need a
 `maxConcurrency` value.

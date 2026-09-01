@@ -12,6 +12,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 - Added multi-profile configuration inheritance and `--profile` selection.
 - Added sequential `validate --all` profile validation with aggregated results.
 - Added sequential `check --all` and `update --all` profile execution.
+- Added bounded parallel execution for `check --all` and `update --all`.
 - Added portable manual installation guidance, with FreeBSD as the first validation target.
 - Added portable `tar.gz` and `zip` distribution archives with a POSIX launcher.
 - Added a non-destructive, prefix-configurable manual installer for FreeBSD.

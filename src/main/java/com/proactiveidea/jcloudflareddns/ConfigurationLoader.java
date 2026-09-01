@@ -82,6 +82,21 @@ public final class ConfigurationLoader {
         }
     }
 
+    public ExecutionConfiguration loadExecution(Path path) throws ConfigurationException {
+        try {
+            JsonNode document = readDocument(path);
+            ExecutionConfiguration execution = document.has("execution")
+                    ? mapper.treeToValue(document.get("execution"), ExecutionConfiguration.class)
+                    : new ExecutionConfiguration("sequential", null);
+            validateExecution(document.get("execution"));
+            return execution;
+        } catch (ConfigurationException exception) {
+            throw exception;
+        } catch (IOException | RuntimeException exception) {
+            throw new ConfigurationException("Configuration file could not be parsed.", exception);
+        }
+    }
+
     private JsonNode readDocument(Path path) throws IOException, ConfigurationException {
         if (path == null) {
             throw new ConfigurationException("Configuration path is required.");

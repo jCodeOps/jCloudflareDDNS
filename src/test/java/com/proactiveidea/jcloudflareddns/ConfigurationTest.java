@@ -210,6 +210,26 @@ class ConfigurationTest {
     }
 
     @Test
+    void loadsParallelExecutionSettings() throws Exception {
+        Path path = write("""
+                execution:
+                  mode: parallel
+                  maxConcurrency: 2
+                profiles:
+                  home:
+                    zone: example.com
+                    record: home.example.com
+                    ttl: 300
+                    tokenEnv: CLOUDFLARE_HOME_TOKEN
+                """);
+
+        ExecutionConfiguration execution = new ConfigurationLoader().loadExecution(path);
+
+        assertEquals("parallel", execution.mode());
+        assertEquals(2, execution.maxConcurrency());
+    }
+
+    @Test
     void validatesAllProfilesAndReportsEveryResult() throws Exception {
         Path path = write("""
                 profiles:

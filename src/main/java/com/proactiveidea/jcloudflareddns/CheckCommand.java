@@ -10,6 +10,9 @@ package com.proactiveidea.jcloudflareddns;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.Callable;
 
 import com.proactiveidea.jcloudflareddns.api.AuthenticationException;
@@ -65,11 +68,40 @@ public final class CheckCommand implements Callable<Integer> {
 
     private int checkAll() throws ConfigurationException {
         Map<String, Configuration> profiles = new ConfigurationLoader().loadAll(configPath);
+        ExecutionConfiguration execution = new ConfigurationLoader().loadExecution(configPath);
+        if (execution.mode().equals("sequential")) {
+            return checkSequentially(profiles);
+        }
+        int concurrency = execution.maxConcurrency() == null ? 2 : execution.maxConcurrency();
+        try (ExecutorService executor = Executors.newFixedThreadPool(concurrency)) {
+            var futures = profiles.entrySet().stream()
+                    .map(entry -> executor.submit(() -> checkOne(entry.getValue(), entry.getKey())))
+                    .toList();
+            return collectResults(futures);
+        }
+    }
+
+    private int checkSequentially(Map<String, Configuration> profiles) {
         int result = ExitCodes.SUCCESS;
         for (Map.Entry<String, Configuration> entry : profiles.entrySet()) {
             result = combine(result, checkOne(entry.getValue(), entry.getKey()));
         }
         return result;
+    }
+
+    private int collectResults(java.util.List<Future<Integer>> futures) throws ConfigurationException {
+        int result = ExitCodes.SUCCESS;
+        try {
+            for (Future<Integer> future : futures) {
+                result = combine(result, future.get());
+            }
+            return result;
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new ConfigurationException("Profile execution was interrupted.", exception);
+        } catch (java.util.concurrent.ExecutionException exception) {
+            throw new ConfigurationException("Profile execution failed unexpectedly.", exception.getCause());
+        }
     }
 
     private int checkOne(Configuration configuration, String profileName) {
@@ -129,10 +161,12 @@ public final class CheckCommand implements Callable<Integer> {
     }
 
     private void output(String profileName, String message) {
-        if (profileName == null) {
-            spec.commandLine().getOut().println(message);
-        } else {
-            spec.commandLine().getOut().printf("Profile '%s': %s%n", profileName, message);
+        synchronized (spec.commandLine()) {
+            if (profileName == null) {
+                spec.commandLine().getOut().println(message);
+            } else {
+                spec.commandLine().getOut().printf("Profile '%s': %s%n", profileName, message);
+            }
         }
     }
 
@@ -145,6 +179,8 @@ public final class CheckCommand implements Callable<Integer> {
     }
 
     private void errorOut(String message) {
-        spec.commandLine().getErr().println(message);
+        synchronized (spec.commandLine()) {
+            spec.commandLine().getErr().println(message);
+        }
     }
 }
