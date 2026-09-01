@@ -22,6 +22,8 @@ import picocli.CommandLine;
 public final class JCloudflareDdnsApplication {
 
     public static final String VERSION = "0.1.0-SNAPSHOT";
+    public static final String BUG_REPORT_EMAIL = "jcabrerav@proactiveidea.com";
+    public static final String PROJECT_URL = "https://github.com/jCodeOps/jCloudflareDDNS";
 
     private JCloudflareDdnsApplication() {
     }
@@ -41,10 +43,32 @@ public final class JCloudflareDdnsApplication {
         commandLine.setOut(out);
         commandLine.setErr(err);
         commandLine.setExecutionExceptionHandler((exception, line, parseResult) -> {
-            line.getErr().printf("Unexpected application error (%s).%n",
-                    exception.getClass().getSimpleName());
+            CommandLine rootLine = line.getCommandSpec().root().commandLine();
+            rootLine.getErr().printf("Unexpected application error. Re-run with --verbose for safe diagnostic "
+                            + "details or report it to %s.%n", BUG_REPORT_EMAIL);
+            writeSafeDiagnostics(exception, rootLine);
             return ExitCodes.FAILURE;
         });
         return commandLine;
+    }
+
+    private static void writeSafeDiagnostics(Throwable exception, CommandLine line) {
+        JCloudflareDdnsCommand.DiagnosticLevel level = diagnosticLevel(line);
+        if (level == JCloudflareDdnsCommand.DiagnosticLevel.NORMAL) {
+            return;
+        }
+        line.getErr().printf("Diagnostic: exception=%s%n", exception.getClass().getSimpleName());
+        if (level == JCloudflareDdnsCommand.DiagnosticLevel.DEBUG && exception.getCause() != null) {
+            line.getErr().printf("Diagnostic: cause=%s%n",
+                    exception.getCause().getClass().getSimpleName());
+        }
+    }
+
+    private static JCloudflareDdnsCommand.DiagnosticLevel diagnosticLevel(CommandLine line) {
+        Object rootCommand = line.getCommandSpec().root().userObject();
+        if (rootCommand instanceof JCloudflareDdnsCommand command) {
+            return command.diagnosticLevel();
+        }
+        return JCloudflareDdnsCommand.DiagnosticLevel.NORMAL;
     }
 }

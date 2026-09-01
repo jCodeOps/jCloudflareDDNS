@@ -40,6 +40,8 @@ class JCloudflareDdnsApplicationTest {
         assertTrue(result.stdout().contains("check"));
         assertTrue(result.stdout().contains("update"));
         assertTrue(result.stdout().contains("validate"));
+        assertTrue(result.stdout().contains("--verbose"));
+        assertTrue(result.stdout().contains(JCloudflareDdnsApplication.BUG_REPORT_EMAIL));
     }
 
     @Test
@@ -48,6 +50,9 @@ class JCloudflareDdnsApplicationTest {
 
         assertEquals(ExitCodes.SUCCESS, result.exitCode());
         assertTrue(result.stdout().contains(JCloudflareDdnsApplication.VERSION));
+        assertTrue(result.stdout().contains("Apache License 2.0"));
+        assertTrue(result.stdout().contains(JCloudflareDdnsApplication.BUG_REPORT_EMAIL));
+        assertTrue(result.stdout().contains(JCloudflareDdnsApplication.PROJECT_URL));
     }
 
     @Test
@@ -110,18 +115,42 @@ class JCloudflareDdnsApplicationTest {
 
     @Test
     void unexpectedCommandFailureReturnsAControlledErrorWithoutItsMessage() {
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        CommandLine commandLine = JCloudflareDdnsApplication.createCommandLine(
-                new FailingCommand(),
-                new PrintWriter(stdout, true), new PrintWriter(stderr, true));
+        CommandLine commandLine = failingApplication(stderr);
 
-        int exitCode = commandLine.execute();
+        int exitCode = commandLine.execute("failing");
 
         String error = stderr.toString(StandardCharsets.UTF_8);
         assertEquals(ExitCodes.FAILURE, exitCode);
-        assertTrue(error.contains("Unexpected application error (IllegalStateException)."));
+        assertTrue(error.contains("Unexpected application error."));
+        assertTrue(error.contains(JCloudflareDdnsApplication.BUG_REPORT_EMAIL));
         assertTrue(!error.contains("sensitive diagnostic value"));
+    }
+
+    @Test
+    void verboseModeShowsOnlyTheExceptionTypeForAnUnexpectedFailure() {
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+
+        int exitCode = failingApplication(stderr).execute("--verbose", "failing");
+
+        String error = stderr.toString(StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.FAILURE, exitCode);
+        assertTrue(error.contains("Diagnostic: exception=IllegalStateException"));
+        assertTrue(!error.contains("sensitive diagnostic value"));
+    }
+
+    @Test
+    void debugModeShowsExceptionAndCauseTypesWithoutTheirMessages() {
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+
+        int exitCode = failingApplication(stderr).execute("--debug", "failing");
+
+        String error = stderr.toString(StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.FAILURE, exitCode);
+        assertTrue(error.contains("Diagnostic: exception=IllegalStateException"));
+        assertTrue(error.contains("Diagnostic: cause=IllegalArgumentException"));
+        assertTrue(!error.contains("sensitive diagnostic value"));
+        assertTrue(!error.contains("sensitive cause value"));
     }
 
     private static CliResult execute(String... args) {
@@ -140,12 +169,21 @@ class JCloudflareDdnsApplicationTest {
     private record CliResult(int exitCode, String stdout, String stderr) {
     }
 
+    private static CommandLine failingApplication(ByteArrayOutputStream stderr) {
+        CommandLine commandLine = JCloudflareDdnsApplication.createCommandLine(
+                new JCloudflareDdnsCommand(), new PrintWriter(new ByteArrayOutputStream(), true),
+                new PrintWriter(stderr, true));
+        commandLine.addSubcommand("failing", new FailingCommand());
+        return commandLine;
+    }
+
     @Command(name = "failing")
     static final class FailingCommand implements Callable<Integer> {
 
         @Override
         public Integer call() {
-            throw new IllegalStateException("sensitive diagnostic value");
+            throw new IllegalStateException("sensitive diagnostic value",
+                    new IllegalArgumentException("sensitive cause value"));
         }
     }
 }

@@ -65,6 +65,15 @@ Future stages may add logging, scheduling, daemon mode, and packaging. None of t
 
 Install JDK 25 and follow the [installation guide](docs/installation.md), then run `./mvnw clean verify`. `./mvnw package` also creates portable `tar.gz` and `zip` distribution archives under `target/`. GitHub Actions repeats this verification on Linux with JDK 25 and smoke-tests the portable `tar.gz` archive.
 
+## Diagnostics and support
+
+Normal CLI output is concise. Use `--verbose` before the command for safe error
+classification, or `--debug` for the exception and cause types. These modes do
+not print stack traces, API Tokens, environment values, HTTP authorization
+headers, or response bodies. Report reproducible problems to
+[jcabrerav@proactiveidea.com](mailto:jcabrerav@proactiveidea.com), including
+the safe diagnostic output and the application version.
+
 ## License and independence
 
 Licensed under the [Apache License 2.0](LICENSE). Copyright 2026 Proactive Idea. Author: Jenny Cabrera Varona.

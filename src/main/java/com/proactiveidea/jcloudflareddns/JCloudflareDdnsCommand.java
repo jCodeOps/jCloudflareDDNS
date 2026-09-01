@@ -14,6 +14,7 @@ package com.proactiveidea.jcloudflareddns;
 import java.util.concurrent.Callable;
 
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 
@@ -21,8 +22,12 @@ import picocli.CommandLine.Model.CommandSpec;
 @Command(
         name = "jcloudflareddns",
         mixinStandardHelpOptions = true,
-        version = JCloudflareDdnsApplication.VERSION,
+        versionProvider = JCloudflareDdnsVersionProvider.class,
         description = "A secure, lightweight Cloudflare Dynamic DNS client.",
+        footer = {
+                "Report bugs: " + JCloudflareDdnsApplication.BUG_REPORT_EMAIL,
+                "Project: " + JCloudflareDdnsApplication.PROJECT_URL
+        },
         subcommands = {
                 CheckCommand.class,
                 UpdateCommand.class,
@@ -32,6 +37,18 @@ import picocli.CommandLine.Model.CommandSpec;
 )
 public final class JCloudflareDdnsCommand implements Callable<Integer> {
 
+    enum DiagnosticLevel {
+        NORMAL,
+        VERBOSE,
+        DEBUG
+    }
+
+    @Option(names = {"-v", "--verbose"}, description = "Show safe diagnostic details on unexpected errors.")
+    private boolean verbose;
+
+    @Option(names = "--debug", description = "Show extended safe diagnostic details without secrets or stack traces.")
+    private boolean debug;
+
     @Spec
     private CommandSpec spec;
 
@@ -39,5 +56,9 @@ public final class JCloudflareDdnsCommand implements Callable<Integer> {
     public Integer call() {
         spec.commandLine().usage(spec.commandLine().getOut());
         return ExitCodes.USAGE_ERROR;
+    }
+
+    DiagnosticLevel diagnosticLevel() {
+        return debug ? DiagnosticLevel.DEBUG : verbose ? DiagnosticLevel.VERBOSE : DiagnosticLevel.NORMAL;
     }
 }
