@@ -1,0 +1,16 @@
+bin/jcloudflareddns
+%%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-annotations-2.22.jar
+%%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-core-2.22.2.jar
+%%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-databind-2.22.2.jar
+%%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-dataformat-yaml-2.22.2.jar
+%%JAVASHAREDIR%%/jcloudflareddns/lib/jcloudflareddns-0.1.0-RC1.jar
+%%JAVASHAREDIR%%/jcloudflareddns/lib/picocli-4.7.7.jar
+%%JAVASHAREDIR%%/jcloudflareddns/lib/snakeyaml-2.5.jar
+%%DOCSDIR%%/CHANGELOG.md
+%%DOCSDIR%%/LICENSE
+%%DOCSDIR%%/README.md
+%%DOCSDIR%%/THIRD-PARTY-NOTICES.md
+%%DOCSDIR%%/jcloudflareddns-sbom.json
+%%DOCSDIR%%/jcloudflareddns-sbom.xml
+@dir %%JAVASHAREDIR%%/jcloudflareddns/lib
+@dir %%JAVASHAREDIR%%/jcloudflareddns

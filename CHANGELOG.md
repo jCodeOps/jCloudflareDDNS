@@ -4,6 +4,8 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Added a FreeBSD Ports candidate for the 0.1.0-RC1 portable archive.
+
 ## 0.1.0-RC1 - 2026-09-01
 
 - Aligned repository rules and release documentation with the implemented CLI.

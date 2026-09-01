@@ -24,3 +24,7 @@ pkg add packages/jcloudflareddns-0.1.0.pkg
 
 The package requires Java 25, installs the launcher under `/usr/local/bin`, and keeps the versioned application under `/usr/local/share`.
 Both FreeBSD scripts verify that the archive has the expected single-root layout before extracting it.
+
+`ports/dns/jcloudflareddns` contains the RC1 candidate for the FreeBSD Ports
+Collection. It packages the portable archive as a Java application and does not
+use these development scripts.

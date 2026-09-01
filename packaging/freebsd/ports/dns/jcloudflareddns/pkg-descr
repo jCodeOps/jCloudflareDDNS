@@ -1,0 +1,13 @@
+jCloudflareDDNS is a secure, lightweight Dynamic DNS client for Cloudflare.
+It is a plain Java command-line application that compares configured DNS
+records with a host's public IPv4 or IPv6 address and can update records using
+least-privilege Cloudflare API Tokens.
+
+Configuration is YAML-based and contains no API Token values. The token is read
+from the environment variable named by the configuration. The application
+supports multiple profiles, bounded retries, and one-shot sequential or
+parallel execution.
+
+This port installs the Java application and its runtime dependencies. It does
+not install a daemon, service definition, scheduler, configuration file, or
+credentials.
