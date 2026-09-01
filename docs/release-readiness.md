@@ -2,13 +2,18 @@
 
 ## Current status
 
-jCloudflareDDNS 0.1.0-RC1 is an unpublished release candidate. The CLI and
-portable archives are validated, but no stable version, release tag, or
-published package exists yet.
+jCloudflareDDNS 0.1.0-RC1 is an unpublished release candidate. Its FreeBSD
+Ports candidate passed `make stage`, `stage-qa`, `check-plist`, `package`,
+`install`, `deinstall`, `portlint -A`, and `poudriere testport` on FreeBSD
+15.1-RELEASE-p3 with OpenJDK 25. No stable version or published release asset
+exists yet.
 
 ## Stable release gates
 
 - Use a non-snapshot version and create a public, immutable release asset.
+- Generate the final archive only after freezing release documentation and
+  record its exact SHA-256 in the matching Ports `distinfo`; do not reuse an
+  artifact after release-content changes.
 - Run the full Maven verification and distribution smoke test.
 - Perform controlled end-to-end Cloudflare tests for IPv4 and IPv6 with
   least-privilege tokens that are never stored in the repository.
