@@ -161,10 +161,12 @@ public final class UpdateCommand implements Callable<Integer> {
     }
 
     private void output(String profileName, String message) {
-        if (profileName == null) {
-            spec.commandLine().getOut().println(message);
-        } else {
-            spec.commandLine().getOut().printf("Profile '%s': %s%n", profileName, message);
+        synchronized (spec.commandLine()) {
+            if (profileName == null) {
+                spec.commandLine().getOut().println(message);
+            } else {
+                spec.commandLine().getOut().printf("Profile '%s': %s%n", profileName, message);
+            }
         }
     }
 
