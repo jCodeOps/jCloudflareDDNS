@@ -32,6 +32,7 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
 
     private static final URI DEFAULT_BASE_URI = URI.create("https://api.cloudflare.com/client/v4");
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
+    private static final int MAX_LIST_PAGES = 100;
 
     private final HttpClient httpClient;
     private final URI baseUri;
@@ -56,13 +57,11 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
 
     @Override
     public Zone findZone(String name) throws CloudflareApiException, AuthenticationException {
-        JsonNode result = send("GET", "/zones?name=" + queryValue(name), null);
-        List<Zone> zones = new ArrayList<>();
-        result.forEach(node -> zones.add(mapper.convertValue(node, Zone.class)));
-        if (zones.isEmpty()) {
-            throw new CloudflareApiException("Cloudflare zone was not found.", 404);
-        }
-        return zones.getFirst();
+        List<Zone> zones = list("/zones?name=" + queryValue(name), Zone.class);
+        return zones.stream()
+                .filter(zone -> name.equals(zone.name()))
+                .findFirst()
+                .orElseThrow(() -> new CloudflareApiException("Cloudflare zone was not found.", 404));
     }
 
     @Override
@@ -71,10 +70,25 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
         String path = "/zones/" + pathSegment(zoneId)
                 + "/dns_records?name=" + queryValue(name)
                 + "&type=" + queryValue(type);
-        JsonNode result = send("GET", path, null);
-        List<DnsRecord> records = new ArrayList<>();
-        result.forEach(node -> records.add(mapper.convertValue(node, DnsRecord.class)));
-        return List.copyOf(records);
+        return list(path, DnsRecord.class).stream()
+                .filter(record -> name.equals(record.name()) && type.equals(record.type()))
+                .toList();
+    }
+
+    private <T> List<T> list(String path, Class<T> valueType)
+            throws CloudflareApiException, AuthenticationException {
+        List<T> values = new ArrayList<>();
+        for (int page = 1; page <= MAX_LIST_PAGES; page++) {
+            CloudflareResponse response = send("GET", path + "&page=" + page, null);
+            if (!response.result().isArray()) {
+                throw new CloudflareApiException("Cloudflare API list response was invalid.", 0);
+            }
+            response.result().forEach(node -> values.add(mapper.convertValue(node, valueType)));
+            if (page >= response.totalPages()) {
+                return List.copyOf(values);
+            }
+        }
+        throw new CloudflareApiException("Cloudflare API list response exceeded the page limit.", 0);
     }
 
     @Override
@@ -90,11 +104,11 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
         JsonNode result = send(
                 "PATCH",
                 "/zones/" + pathSegment(zoneId) + "/dns_records/" + pathSegment(recordId),
-                body.toString());
+                body.toString()).result();
         return mapper.convertValue(result, DnsRecord.class);
     }
 
-    private JsonNode send(String method, String path, String body)
+    private CloudflareResponse send(String method, String path, String body)
             throws CloudflareApiException, AuthenticationException {
         char[] token = tokenProvider.token();
         String tokenValue = new String(token);
@@ -123,7 +137,7 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
         }
     }
 
-    private JsonNode parseResponse(int statusCode, String responseBody) throws CloudflareApiException {
+    private CloudflareResponse parseResponse(int statusCode, String responseBody) throws CloudflareApiException {
         try {
             JsonNode root = mapper.readTree(responseBody);
             if (statusCode < 200 || statusCode >= 300 || !root.path("success").asBoolean(false)) {
@@ -134,10 +148,17 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
             if (result == null || result.isMissingNode() || result.isNull()) {
                 throw new CloudflareApiException("Cloudflare API response had no result.", statusCode);
             }
-            return result;
+            int totalPages = root.path("result_info").path("total_pages").asInt(1);
+            if (totalPages < 1) {
+                throw new CloudflareApiException("Cloudflare API pagination metadata was invalid.", statusCode);
+            }
+            return new CloudflareResponse(result, totalPages);
         } catch (IOException | RuntimeException exception) {
             throw new CloudflareApiException("Cloudflare API returned invalid JSON.", statusCode, exception);
         }
+    }
+
+    private record CloudflareResponse(JsonNode result, int totalPages) {
     }
 
     private static URI normalizeBaseUri(URI uri) {

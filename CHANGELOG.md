@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Added bounded Cloudflare API pagination for zone and DNS record lookups.
 - Added ordered public IP providers for IPv4 and IPv6.
 - Added bounded retries for transient public IP provider failures.
 - Made the retry budget explicit and immutable for future execution policies.

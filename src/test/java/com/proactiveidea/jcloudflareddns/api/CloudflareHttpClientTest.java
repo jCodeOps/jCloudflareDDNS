@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
@@ -70,6 +72,61 @@ class CloudflareHttpClientTest {
         assertEquals(1, records.size());
         assertEquals("record-id", records.getFirst().id());
         assertEquals("198.51.100.10", records.getFirst().content());
+    }
+
+    @Test
+    void findsAnExactZoneAcrossPages() throws Exception {
+        List<String> requestedPages = new ArrayList<>();
+        server.removeContext("/client/v4");
+        server.createContext("/client/v4", exchange -> {
+            requestedPages.add(exchange.getRequestURI().getQuery());
+            if (exchange.getRequestURI().getQuery().contains("page=1")) {
+                respond(exchange, 200, """
+                        {"success":true,"result":[{"id":"other-zone","name":"other.example","status":"active"}],
+                        "result_info":{"page":1,"total_pages":2}}
+                        """);
+            } else {
+                respond(exchange, 200, """
+                        {"success":true,"result":[{"id":"zone-id","name":"example.com","status":"active"}],
+                        "result_info":{"page":2,"total_pages":2}}
+                        """);
+            }
+        });
+
+        Zone zone = client().findZone("example.com");
+
+        assertEquals("zone-id", zone.id());
+        assertEquals(2, requestedPages.size());
+        assertTrue(requestedPages.getFirst().contains("page=1"));
+        assertTrue(requestedPages.getLast().contains("page=2"));
+    }
+
+    @Test
+    void listsMatchingRecordsAcrossPages() throws Exception {
+        List<String> requestedPages = new ArrayList<>();
+        server.removeContext("/client/v4");
+        server.createContext("/client/v4", exchange -> {
+            requestedPages.add(exchange.getRequestURI().getQuery());
+            if (exchange.getRequestURI().getQuery().contains("page=1")) {
+                respond(exchange, 200, """
+                        {"success":true,"result":[{"id":"record-first","name":"host.example.com","type":"A","content":"198.51.100.10","ttl":300,"proxied":false}],
+                        "result_info":{"page":1,"total_pages":2}}
+                        """);
+            } else {
+                respond(exchange, 200, """
+                        {"success":true,"result":[{"id":"record-second","name":"host.example.com","type":"A","content":"198.51.100.11","ttl":300,"proxied":false}],
+                        "result_info":{"page":2,"total_pages":2}}
+                        """);
+            }
+        });
+
+        List<DnsRecord> records = client().listRecords("zone-id", "host.example.com", "A");
+
+        assertEquals(List.of("record-first", "record-second"),
+                records.stream().map(DnsRecord::id).toList());
+        assertEquals(2, requestedPages.size());
+        assertTrue(requestedPages.getFirst().contains("page=1"));
+        assertTrue(requestedPages.getLast().contains("page=2"));
     }
 
     @Test
