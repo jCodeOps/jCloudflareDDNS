@@ -9,6 +9,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 - Made the retry budget explicit and immutable for future execution policies.
 - Hardened YAML secret-key detection for nested configuration values.
 - Documented the complete non-secret configuration schema and retry contract.
+- Added multi-profile configuration inheritance and `--profile` selection.
 - Added portable manual installation guidance, with FreeBSD as the first validation target.
 - Added portable `tar.gz` and `zip` distribution archives with a POSIX launcher.
 - Added a non-destructive, prefix-configurable manual installer for FreeBSD.

@@ -163,6 +163,53 @@ class ConfigurationTest {
     }
 
     @Test
+    void resolvesProfileValuesOverDefaults() throws Exception {
+        Path path = write("""
+                defaults:
+                  ttl: 300
+                  proxied: false
+                  tokenEnv: CLOUDFLARE_DEFAULT_TOKEN
+                  ipVersion: ipv4
+                profiles:
+                  office:
+                    zone: example.com
+                    record: office.example.com
+                    tokenEnv: CLOUDFLARE_OFFICE_TOKEN
+                    ipVersion: ipv6
+                """);
+
+        Configuration configuration = new ConfigurationLoader().load(path, "office");
+
+        assertEquals("example.com", configuration.zone());
+        assertEquals("office.example.com", configuration.record());
+        assertEquals(300, configuration.ttl());
+        assertEquals("CLOUDFLARE_OFFICE_TOKEN", configuration.tokenEnv());
+        assertEquals("ipv6", configuration.ipVersion());
+        assertTrue(new ConfigurationValidator().validate(configuration).isEmpty());
+    }
+
+    @Test
+    void validatesExecutionModeAndSequentialConcurrency() throws Exception {
+        Path path = write("""
+                execution:
+                  mode: sequential
+                  maxConcurrency: 2
+                profiles:
+                  home:
+                    zone: example.com
+                    record: home.example.com
+                    ttl: 300
+                    tokenEnv: CLOUDFLARE_HOME_TOKEN
+                """);
+
+        ConfigurationException exception = assertThrows(
+                ConfigurationException.class,
+                () -> new ConfigurationLoader().load(path, "home"));
+
+        assertTrue(exception.getMessage().contains("must be 1 when execution.mode is sequential"));
+    }
+
+    @Test
     void validateCommandReturnsSuccessForValidConfiguration() throws Exception {
         Path path = write("""
                 zone: example.com

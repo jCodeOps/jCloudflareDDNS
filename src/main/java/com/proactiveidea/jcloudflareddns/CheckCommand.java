@@ -39,13 +39,16 @@ public final class CheckCommand implements Callable<Integer> {
     @Option(names = {"-c", "--config"}, required = true, description = "Path to the YAML configuration file.")
     private Path configPath;
 
+    @Option(names = "--profile", description = "Named configuration profile to execute.")
+    private String profile;
+
     @Spec
     private CommandSpec spec;
 
     @Override
     public Integer call() {
         try {
-            Configuration configuration = new ConfigurationLoader().load(configPath);
+            Configuration configuration = new ConfigurationLoader().load(configPath, profile);
             var validationErrors = new ConfigurationValidator().validate(configuration);
             if (!validationErrors.isEmpty()) {
                 validationErrors.forEach(error -> errorOut("Error: " + error));

@@ -26,13 +26,16 @@ public final class ValidateCommand implements Callable<Integer> {
     @Option(names = {"-c", "--config"}, required = true, description = "Path to the YAML configuration file.")
     private Path configPath;
 
+    @Option(names = "--profile", description = "Named configuration profile to validate.")
+    private String profile;
+
     @Spec
     private CommandSpec spec;
 
     @Override
     public Integer call() {
         try {
-            Configuration configuration = new ConfigurationLoader().load(configPath);
+            Configuration configuration = new ConfigurationLoader().load(configPath, profile);
             var errors = new ConfigurationValidator().validate(configuration);
             if (!errors.isEmpty()) {
                 errors.forEach(error -> spec.commandLine().getErr().println("Error: " + error));

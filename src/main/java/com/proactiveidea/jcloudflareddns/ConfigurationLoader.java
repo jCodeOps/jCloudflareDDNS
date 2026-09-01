@@ -33,6 +33,10 @@ public final class ConfigurationLoader {
     }
 
     public Configuration load(Path path) throws ConfigurationException {
+        return load(path, null);
+    }
+
+    public Configuration load(Path path, String profile) throws ConfigurationException {
         if (path == null) {
             throw new ConfigurationException("Configuration path is required.");
         }
@@ -50,12 +54,73 @@ public final class ConfigurationLoader {
             if (document == null || document.isNull()) {
                 throw new ConfigurationException("Configuration file is empty.");
             }
-            return mapper.treeToValue(document, Configuration.class);
+            if (!document.has("profiles") && !document.has("defaults") && !document.has("execution")) {
+                if (profile != null) {
+                    throw new ConfigurationException("--profile requires a multi-profile configuration.");
+                }
+                return mapper.treeToValue(document, Configuration.class);
+            }
+            validateExecution(document.get("execution"));
+            return resolveProfile(document, profile);
         } catch (ConfigurationException exception) {
             throw exception;
         } catch (IOException | RuntimeException exception) {
             throw new ConfigurationException("Configuration file could not be parsed.", exception);
         }
+    }
+
+    private Configuration resolveProfile(JsonNode document, String profile) throws IOException, ConfigurationException {
+        ConfigurationOverride defaults = document.has("defaults")
+                ? mapper.treeToValue(document.get("defaults"), ConfigurationOverride.class)
+                : new ConfigurationOverride(null, null, null, null, null, null, null, null);
+        JsonNode profilesNode = document.get("profiles");
+        if (profilesNode == null || !profilesNode.isObject() || profilesNode.isEmpty()) {
+            throw new ConfigurationException("profiles must contain at least one named profile.");
+        }
+        if (profile == null || profile.isBlank()) {
+            throw new ConfigurationException("A profile name is required for a multi-profile configuration.");
+        }
+        JsonNode selectedNode = profilesNode.get(profile);
+        if (selectedNode == null) {
+            throw new ConfigurationException("Unknown configuration profile: " + profile);
+        }
+        ConfigurationOverride selected = mapper.treeToValue(selectedNode, ConfigurationOverride.class);
+        return merge(defaults, selected);
+    }
+
+    private void validateExecution(JsonNode executionNode) throws IOException, ConfigurationException {
+        if (executionNode == null) {
+            return;
+        }
+        ExecutionConfiguration execution = mapper.treeToValue(executionNode, ExecutionConfiguration.class);
+        if (!execution.mode().equals("sequential") && !execution.mode().equals("parallel")) {
+            throw new ConfigurationException("execution.mode must be sequential or parallel.");
+        }
+        if (execution.maxConcurrency() != null
+                && (execution.maxConcurrency() < 1 || execution.maxConcurrency() > 16)) {
+            throw new ConfigurationException("execution.maxConcurrency must be between 1 and 16.");
+        }
+        if (execution.mode().equals("sequential")
+                && execution.maxConcurrency() != null && execution.maxConcurrency() != 1) {
+            throw new ConfigurationException(
+                    "execution.maxConcurrency must be 1 when execution.mode is sequential.");
+        }
+    }
+
+    private static Configuration merge(ConfigurationOverride defaults, ConfigurationOverride selected) {
+        return new Configuration(
+                first(selected.zone(), defaults.zone()),
+                first(selected.record(), defaults.record()),
+                first(selected.ttl(), defaults.ttl()),
+                first(selected.proxied(), defaults.proxied()),
+                first(selected.tokenEnv(), defaults.tokenEnv()),
+                first(selected.ipProviderUrls(), defaults.ipProviderUrls()),
+                first(selected.useDefaultIpProviders(), defaults.useDefaultIpProviders()),
+                first(selected.ipVersion(), defaults.ipVersion()));
+    }
+
+    private static <T> T first(T selected, T fallback) {
+        return selected != null ? selected : fallback;
     }
 
     private static void rejectSecretKeys(JsonNode node) throws ConfigurationException {

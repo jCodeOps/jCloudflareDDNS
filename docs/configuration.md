@@ -48,3 +48,39 @@ relying on an unbounded in-process loop.
 
 Never put API Tokens, Global API Keys, passwords, or other secrets in YAML,
 source code, command arguments, logs, or issue reports.
+
+## Multiple profiles
+
+One file may define shared defaults and named profiles:
+
+```yaml
+defaults:
+  ttl: 300
+  proxied: false
+  ipVersion: ipv4
+
+profiles:
+  home:
+    zone: example.com
+    record: home.example.com
+    tokenEnv: CLOUDFLARE_HOME_TOKEN
+  office:
+    zone: example.net
+    record: office.example.net
+    tokenEnv: CLOUDFLARE_OFFICE_TOKEN
+    ipVersion: ipv6
+```
+
+Run a selected profile with `--profile home`. Profile values override defaults;
+omitted values inherit them. A multi-profile file must name the profile
+explicitly. The current phase validates the `execution` settings, but execution
+of all profiles and bounded parallelism will be added in a later phase.
+
+```yaml
+execution:
+  mode: sequential
+```
+
+Use `mode: parallel` with an optional `maxConcurrency` from 1 through 16 when
+parallel execution becomes available. Sequential mode does not need a
+`maxConcurrency` value.

@@ -40,6 +40,9 @@ public final class UpdateCommand implements Callable<Integer> {
     @Option(names = {"-c", "--config"}, required = true, description = "Path to the YAML configuration file.")
     private Path configPath;
 
+    @Option(names = "--profile", description = "Named configuration profile to execute.")
+    private String profile;
+
     @Option(names = "--dry-run", description = "Show the update without changing Cloudflare (the default).")
     private boolean dryRun;
 
@@ -68,7 +71,7 @@ public final class UpdateCommand implements Callable<Integer> {
                 errorOut("Options --dry-run and --apply cannot be used together.");
                 return ExitCodes.USAGE_ERROR;
             }
-            Configuration configuration = new ConfigurationLoader().load(configPath);
+            Configuration configuration = new ConfigurationLoader().load(configPath, profile);
             var validationErrors = new ConfigurationValidator().validate(configuration);
             if (!validationErrors.isEmpty()) {
                 validationErrors.forEach(error -> errorOut("Error: " + error));

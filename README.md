@@ -43,6 +43,17 @@ The configuration can be validated with `jcloudflareddns validate --config confi
 
 See the [configuration guide](docs/configuration.md) for the complete schema and retry behavior.
 
+For multiple DNS targets, one YAML file may define shared `defaults` and named
+`profiles`. Select a profile with `--profile`, for example:
+
+```sh
+jcloudflareddns validate --config config.yml --profile home
+```
+
+Profile execution is currently one profile per invocation. The `execution`
+section is validated now; processing all profiles and bounded parallel execution
+will be enabled in a later phase.
+
 Future stages may add logging, scheduling, daemon mode, and packaging. None of those features should be assumed available in this release.
 
 ## Development
