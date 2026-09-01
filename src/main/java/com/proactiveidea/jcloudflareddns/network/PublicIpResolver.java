@@ -9,6 +9,7 @@
 package com.proactiveidea.jcloudflareddns.network;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -19,10 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.proactiveidea.jcloudflareddns.http.BoundedResponseBody;
+
 /** Resolves a public IP using ordered providers and bounded transient-failure retries. */
 public final class PublicIpResolver {
 
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
+    private static final int MAX_RESPONSE_BYTES = 1_024;
 
     private final HttpClient httpClient;
     private final List<URI> providerUris;
@@ -100,18 +104,23 @@ public final class PublicIpResolver {
                 .GET()
                 .build();
         try {
-            HttpResponse<String> response = httpClient.send(
-                    request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            if (response.statusCode() >= 500 && response.statusCode() < 600) {
-                throw new RetryableProviderException("Provider returned a server error.");
-            }
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new NonRetryableProviderException("Provider returned an unsuccessful response.");
-            }
-            try {
-                return IpAddress.parse(response.body(), ipVersion);
-            } catch (IllegalArgumentException exception) {
-                throw new NonRetryableProviderException("Provider returned an invalid IP address.", exception);
+            HttpResponse<InputStream> response = httpClient.send(
+                    request, HttpResponse.BodyHandlers.ofInputStream());
+            try (InputStream responseBody = response.body()) {
+                if (response.statusCode() >= 500 && response.statusCode() < 600) {
+                    throw new RetryableProviderException("Provider returned a server error.");
+                }
+                if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                    throw new NonRetryableProviderException("Provider returned an unsuccessful response.");
+                }
+                try {
+                    return IpAddress.parse(
+                            BoundedResponseBody.read(responseBody, MAX_RESPONSE_BYTES, StandardCharsets.UTF_8), ipVersion);
+                } catch (BoundedResponseBody.ResponseTooLargeException exception) {
+                    throw new NonRetryableProviderException("Provider response exceeded the maximum size.", exception);
+                } catch (IllegalArgumentException exception) {
+                    throw new NonRetryableProviderException("Provider returned an invalid IP address.", exception);
+                }
             }
         } catch (IOException exception) {
             throw new RetryableProviderException("Provider request failed.", exception);

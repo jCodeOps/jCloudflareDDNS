@@ -107,6 +107,20 @@ class PublicIpResolverTest {
     }
 
     @Test
+    void fallsBackAfterAnOversizedProviderResponse() throws Exception {
+        responseBody = "x".repeat(1_025);
+        IpAddress address = new PublicIpResolver(
+                java.net.http.HttpClient.newHttpClient(),
+                List.of(
+                        URI.create("http://localhost:" + server.getAddress().getPort() + "/ip"),
+                        URI.create("http://localhost:" + server.getAddress().getPort() + "/fallback")),
+                IpVersion.IPV4).resolve();
+
+        assertEquals("203.0.113.20", address.value());
+        assertEquals(2, responseCount);
+    }
+
+    @Test
     void validatesIpv4WithoutDnsResolution() {
         assertEquals("0.0.0.0", IpAddress.parse("0.0.0.0").value());
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("01.2.3.4"));

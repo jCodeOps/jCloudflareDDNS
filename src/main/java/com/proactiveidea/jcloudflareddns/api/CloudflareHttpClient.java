@@ -12,6 +12,7 @@
 package com.proactiveidea.jcloudflareddns.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -26,6 +27,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.proactiveidea.jcloudflareddns.http.BoundedResponseBody;
 
 /** HTTP implementation of the Cloudflare API boundary. */
 public final class CloudflareHttpClient implements CloudflareApiClient {
@@ -33,6 +35,7 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
     private static final URI DEFAULT_BASE_URI = URI.create("https://api.cloudflare.com/client/v4");
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
     private static final int MAX_LIST_PAGES = 100;
+    private static final int MAX_RESPONSE_BYTES = 1_048_576;
 
     private final HttpClient httpClient;
     private final URI baseUri;
@@ -124,9 +127,15 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
                 request.header("Content-Type", "application/json")
                         .method(method, HttpRequest.BodyPublishers.ofString(body));
             }
-            HttpResponse<String> response = httpClient.send(
-                    request.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            return parseResponse(response.statusCode(), response.body());
+            HttpResponse<InputStream> response = httpClient.send(
+                    request.build(), HttpResponse.BodyHandlers.ofInputStream());
+            try (InputStream responseBody = response.body()) {
+                return parseResponse(response.statusCode(),
+                        BoundedResponseBody.read(responseBody, MAX_RESPONSE_BYTES, StandardCharsets.UTF_8));
+            } catch (BoundedResponseBody.ResponseTooLargeException exception) {
+                throw new CloudflareApiException(
+                        "Cloudflare API response exceeded the maximum size.", response.statusCode(), exception);
+            }
         } catch (IOException exception) {
             throw new CloudflareApiException("Cloudflare API request failed.", 0, exception);
         } catch (InterruptedException exception) {

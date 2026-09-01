@@ -157,6 +157,21 @@ class CloudflareHttpClientTest {
         assertTrue(!exception.getMessage().contains("secret response"));
     }
 
+    @Test
+    void rejectsAnOversizedResponseWithoutIncludingItsBody() throws Exception {
+        server.removeContext("/client/v4");
+        String oversizedValue = "x".repeat(1_048_577);
+        server.createContext("/client/v4", exchange -> respond(
+                exchange, 200, "{\"success\":true,\"result\":\"" + oversizedValue + "\"}"));
+
+        CloudflareApiException exception = assertThrows(
+                CloudflareApiException.class,
+                () -> client().findZone("example.com"));
+
+        assertTrue(exception.getMessage().contains("exceeded the maximum size"));
+        assertTrue(!exception.getMessage().contains(oversizedValue));
+    }
+
     private CloudflareApiClient client() {
         URI baseUri = URI.create("http://localhost:" + server.getAddress().getPort() + "/client/v4");
         return new CloudflareHttpClient(
