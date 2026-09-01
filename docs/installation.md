@@ -4,7 +4,7 @@
 
 No native installer or operating-system package is published yet. The supported installation method during early development is a source checkout built with JDK 25 and the Maven Wrapper. The application is a one-shot CLI and does not require a service manager.
 
-Stage 9 also produces a portable distribution archive during `package`. It contains the application, runtime dependencies, and a POSIX launcher; it does not install files into system directories.
+The `package` goal also produces a portable distribution archive. It contains the application, runtime dependencies, and a POSIX launcher; it does not install files into system directories.
 
 ## FreeBSD
 

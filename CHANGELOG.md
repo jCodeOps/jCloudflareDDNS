@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Aligned repository rules and release documentation with the implemented CLI.
 - Added weekly Dependabot monitoring for Maven dependencies and GitHub Actions.
 - Added reproducible CycloneDX JSON and XML SBOM files to portable distributions.
 - Added runtime dependency attribution notices to portable distributions.
