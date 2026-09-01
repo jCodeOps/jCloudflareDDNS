@@ -94,6 +94,17 @@ class UpdateCommandTest {
     }
 
     @Test
+    void doesNotUpdateWhenCloudflareRecordContentIsInvalid() throws Exception {
+        RecordingCloudflareClient cloudflare = new RecordingCloudflareClient("not-an-ip-address");
+        CliResult result = execute(configuration(), cloudflare, false);
+
+        assertEquals(ExitCodes.API_ERROR, result.exitCode());
+        assertTrue(result.stderr().contains("host.example.com"));
+        assertTrue(result.stderr().contains("not-an-ip-address"));
+        assertEquals(0, cloudflare.updateCalls);
+    }
+
+    @Test
     void dryRunProcessesAllProfilesSequentially() throws Exception {
         Path config = Files.writeString(temporaryDirectory.resolve("profiles.yml"), """
                 profiles:

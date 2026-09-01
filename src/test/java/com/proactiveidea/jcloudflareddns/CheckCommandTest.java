@@ -73,6 +73,15 @@ class CheckCommandTest {
         assertTrue(result.stdout().contains("DNS record differs"));
     }
 
+    @Test
+    void identifiesInvalidCloudflareRecordContent() throws Exception {
+        CliResult result = execute("not-an-ip-address");
+
+        assertEquals(ExitCodes.API_ERROR, result.exitCode());
+        assertTrue(result.stderr().contains("host.example.com"));
+        assertTrue(result.stderr().contains("not-an-ip-address"));
+    }
+
     private CliResult execute(String currentContent) throws Exception {
         Path config = Files.writeString(temporaryDirectory.resolve("config.yml"), """
                 zone: example.com

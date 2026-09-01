@@ -126,7 +126,15 @@ public final class UpdateCommand implements Callable<Integer> {
                 return ExitCodes.API_ERROR;
             }
             DnsRecord record = records.getFirst();
-            if (publicIp.value().equals(IpAddress.parse(record.content(), ipVersion).value())) {
+            IpAddress recordIp;
+            try {
+                recordIp = IpAddress.parse(record.content(), ipVersion);
+            } catch (IllegalArgumentException exception) {
+                errorOut(profileName, "Cloudflare DNS record '" + record.name() + "' has invalid "
+                        + ipVersion.recordType() + " content: " + record.content());
+                return ExitCodes.API_ERROR;
+            }
+            if (publicIp.value().equals(recordIp.value())) {
                 output(profileName, "DNS record is already up to date: " + publicIp.value());
                 return ExitCodes.SUCCESS;
             }
@@ -154,9 +162,6 @@ public final class UpdateCommand implements Callable<Integer> {
             }
             errorOut(profileName, "Cloudflare API error: " + exception.getMessage());
             return exception.statusCode() == 0 ? ExitCodes.NETWORK_ERROR : ExitCodes.API_ERROR;
-        } catch (IllegalArgumentException exception) {
-            errorOut(profileName, "Cloudflare API returned an invalid IP record.");
-            return ExitCodes.API_ERROR;
         }
     }
 
