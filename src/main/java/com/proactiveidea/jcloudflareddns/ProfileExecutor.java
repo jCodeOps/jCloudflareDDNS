@@ -46,10 +46,15 @@ public final class ProfileExecutor {
         }
     }
 
-    private int executeSequentially(Map<String, Configuration> profiles, ProfileTask task) {
+    private int executeSequentially(Map<String, Configuration> profiles, ProfileTask task)
+            throws ConfigurationException {
         int result = ExitCodes.SUCCESS;
         for (Map.Entry<String, Configuration> entry : profiles.entrySet()) {
-            result = combine(result, task.run(entry.getKey(), entry.getValue()));
+            try {
+                result = combine(result, task.run(entry.getKey(), entry.getValue()));
+            } catch (RuntimeException exception) {
+                throw new ConfigurationException("Profile execution failed unexpectedly.", exception);
+            }
         }
         return result;
     }

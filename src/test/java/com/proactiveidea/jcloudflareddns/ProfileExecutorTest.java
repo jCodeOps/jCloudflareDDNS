@@ -59,6 +59,15 @@ class ProfileExecutorTest {
                 }));
     }
 
+    @Test
+    void unexpectedSequentialTaskFailureBecomesConfigurationException() {
+        assertThrows(ConfigurationException.class, () -> executor.execute(
+                Map.of("profile", configuration()), new ExecutionConfiguration("sequential", null),
+                (name, configuration) -> {
+                    throw new IllegalStateException("test failure");
+                }));
+    }
+
     private static Configuration configuration() {
         return new Configuration("example.com", "host.example.com", 300, false,
                 "CLOUDFLARE_API_TOKEN", java.util.List.of(), true, "ipv4");
