@@ -162,6 +162,9 @@ public final class UpdateCommand implements Callable<Integer> {
             }
             errorOut(profileName, "Cloudflare API error: " + exception.getMessage());
             return exception.statusCode() == 0 ? ExitCodes.NETWORK_ERROR : ExitCodes.API_ERROR;
+        } catch (IllegalArgumentException exception) {
+            errorOut(profileName, "Unable to process IP data: " + exception.getMessage());
+            return ExitCodes.API_ERROR;
         }
     }
 
