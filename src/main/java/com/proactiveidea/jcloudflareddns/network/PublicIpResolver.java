@@ -23,13 +23,11 @@ import java.util.Objects;
 public final class PublicIpResolver {
 
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
-    private static final Duration RETRY_DELAY = Duration.ofMillis(250);
-    private static final int MAX_TOTAL_ATTEMPTS = 3;
-    private static final int MAX_ATTEMPTS_PER_PROVIDER = 2;
 
     private final HttpClient httpClient;
     private final List<URI> providerUris;
     private final IpVersion ipVersion;
+    private final RetryPolicy retryPolicy;
 
     public PublicIpResolver(URI providerUri) {
         this(providerUri, IpVersion.IPV4);
@@ -48,6 +46,11 @@ public final class PublicIpResolver {
     }
 
     public PublicIpResolver(HttpClient httpClient, List<URI> providerUris, IpVersion ipVersion) {
+        this(httpClient, providerUris, ipVersion, RetryPolicy.defaults());
+    }
+
+    public PublicIpResolver(
+            HttpClient httpClient, List<URI> providerUris, IpVersion ipVersion, RetryPolicy retryPolicy) {
         this.httpClient = Objects.requireNonNull(httpClient, "httpClient");
         if (providerUris == null || providerUris.isEmpty()) {
             throw new IllegalArgumentException("At least one public IP provider is required.");
@@ -57,6 +60,7 @@ public final class PublicIpResolver {
                 .map(PublicIpResolver::validateUri)
                 .toList();
         this.ipVersion = Objects.requireNonNull(ipVersion, "ipVersion");
+        this.retryPolicy = Objects.requireNonNull(retryPolicy, "retryPolicy");
     }
 
     public IpAddress resolve() throws PublicIpException {
@@ -64,14 +68,16 @@ public final class PublicIpResolver {
         int attempts = 0;
         for (URI providerUri : providerUris) {
             for (int providerAttempt = 1;
-                    providerAttempt <= MAX_ATTEMPTS_PER_PROVIDER && attempts < MAX_TOTAL_ATTEMPTS;
+                    providerAttempt <= retryPolicy.maxAttemptsPerProvider()
+                            && attempts < retryPolicy.maxTotalAttempts();
                     providerAttempt++) {
                 attempts++;
                 try {
                     return request(providerUri);
                 } catch (RetryableProviderException exception) {
                     failures.add(exception);
-                    if (attempts < MAX_TOTAL_ATTEMPTS && providerAttempt < MAX_ATTEMPTS_PER_PROVIDER) {
+                    if (attempts < retryPolicy.maxTotalAttempts()
+                            && providerAttempt < retryPolicy.maxAttemptsPerProvider()) {
                         pauseBeforeRetry();
                     }
                 } catch (NonRetryableProviderException exception) {
@@ -115,9 +121,9 @@ public final class PublicIpResolver {
         }
     }
 
-    private static void pauseBeforeRetry() throws PublicIpException {
+    private void pauseBeforeRetry() throws PublicIpException {
         try {
-            Thread.sleep(RETRY_DELAY);
+            Thread.sleep(retryPolicy.retryDelay());
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new PublicIpException("Public IP provider retry was interrupted.", exception);
