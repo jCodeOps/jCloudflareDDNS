@@ -12,6 +12,7 @@
 package com.proactiveidea.jcloudflareddns;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import picocli.CommandLine.Command;
@@ -29,12 +30,22 @@ public final class ValidateCommand implements Callable<Integer> {
     @Option(names = "--profile", description = "Named configuration profile to validate.")
     private String profile;
 
+    @Option(names = "--all", description = "Validate every named profile sequentially.")
+    private boolean all;
+
     @Spec
     private CommandSpec spec;
 
     @Override
     public Integer call() {
         try {
+            if (all && profile != null) {
+                spec.commandLine().getErr().println("Options --all and --profile cannot be used together.");
+                return ExitCodes.USAGE_ERROR;
+            }
+            if (all) {
+                return validateAll();
+            }
             Configuration configuration = new ConfigurationLoader().load(configPath, profile);
             var errors = new ConfigurationValidator().validate(configuration);
             if (!errors.isEmpty()) {
@@ -47,5 +58,21 @@ public final class ValidateCommand implements Callable<Integer> {
             spec.commandLine().getErr().println("Error: " + exception.getMessage());
             return ExitCodes.VALIDATION_ERROR;
         }
+    }
+
+    private int validateAll() throws ConfigurationException {
+        Map<String, Configuration> profiles = new ConfigurationLoader().loadAll(configPath);
+        boolean valid = true;
+        for (Map.Entry<String, Configuration> entry : profiles.entrySet()) {
+            var errors = new ConfigurationValidator().validate(entry.getValue());
+            if (errors.isEmpty()) {
+                spec.commandLine().getOut().printf("Profile '%s' is valid.%n", entry.getKey());
+            } else {
+                valid = false;
+                errors.forEach(error -> spec.commandLine().getErr().printf(
+                        "Profile '%s': Error: %s%n", entry.getKey(), error));
+            }
+        }
+        return valid ? ExitCodes.SUCCESS : ExitCodes.VALIDATION_ERROR;
     }
 }

@@ -16,6 +16,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Collections;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,23 +40,8 @@ public final class ConfigurationLoader {
     }
 
     public Configuration load(Path path, String profile) throws ConfigurationException {
-        if (path == null) {
-            throw new ConfigurationException("Configuration path is required.");
-        }
-        if (!Files.isRegularFile(path)) {
-            throw new ConfigurationException("Configuration file does not exist: " + path);
-        }
-        if (!Files.isReadable(path)) {
-            throw new ConfigurationException("Configuration file is not readable: " + path);
-        }
-
         try {
-            String yaml = Files.readString(path, StandardCharsets.UTF_8);
-            JsonNode document = mapper.readTree(yaml);
-            rejectSecretKeys(document);
-            if (document == null || document.isNull()) {
-                throw new ConfigurationException("Configuration file is empty.");
-            }
+            JsonNode document = readDocument(path);
             if (!document.has("profiles") && !document.has("defaults") && !document.has("execution")) {
                 if (profile != null) {
                     throw new ConfigurationException("--profile requires a multi-profile configuration.");
@@ -67,6 +55,49 @@ public final class ConfigurationLoader {
         } catch (IOException | RuntimeException exception) {
             throw new ConfigurationException("Configuration file could not be parsed.", exception);
         }
+    }
+
+    public Map<String, Configuration> loadAll(Path path) throws ConfigurationException {
+        try {
+            JsonNode document = readDocument(path);
+            if (!document.has("profiles") && !document.has("defaults") && !document.has("execution")) {
+                return Map.of("default", mapper.treeToValue(document, Configuration.class));
+            }
+            validateExecution(document.get("execution"));
+            JsonNode profilesNode = document.get("profiles");
+            if (profilesNode == null || !profilesNode.isObject() || profilesNode.isEmpty()) {
+                throw new ConfigurationException("profiles must contain at least one named profile.");
+            }
+            Map<String, Configuration> profiles = new LinkedHashMap<>();
+            Iterator<String> names = profilesNode.fieldNames();
+            while (names.hasNext()) {
+                String name = names.next();
+                profiles.put(name, resolveProfile(document, name));
+            }
+            return Collections.unmodifiableMap(profiles);
+        } catch (ConfigurationException exception) {
+            throw exception;
+        } catch (IOException | RuntimeException exception) {
+            throw new ConfigurationException("Configuration file could not be parsed.", exception);
+        }
+    }
+
+    private JsonNode readDocument(Path path) throws IOException, ConfigurationException {
+        if (path == null) {
+            throw new ConfigurationException("Configuration path is required.");
+        }
+        if (!Files.isRegularFile(path)) {
+            throw new ConfigurationException("Configuration file does not exist: " + path);
+        }
+        if (!Files.isReadable(path)) {
+            throw new ConfigurationException("Configuration file is not readable: " + path);
+        }
+        JsonNode document = mapper.readTree(Files.readString(path, StandardCharsets.UTF_8));
+        rejectSecretKeys(document);
+        if (document == null || document.isNull()) {
+            throw new ConfigurationException("Configuration file is empty.");
+        }
+        return document;
     }
 
     private Configuration resolveProfile(JsonNode document, String profile) throws IOException, ConfigurationException {

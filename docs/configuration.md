@@ -71,10 +71,11 @@ profiles:
     ipVersion: ipv6
 ```
 
-Run a selected profile with `--profile home`. Profile values override defaults;
-omitted values inherit them. A multi-profile file must name the profile
-explicitly. The current phase validates the `execution` settings, but execution
-of all profiles and bounded parallelism will be added in a later phase.
+Run a selected profile with `--profile home`, or validate every profile with
+`--all`. Profile values override defaults; omitted values inherit them. A
+multi-profile file must name the profile explicitly unless `--all` is used for
+validation. Network execution of all profiles and bounded parallelism will be
+added in a later phase.
 
 ```yaml
 execution:

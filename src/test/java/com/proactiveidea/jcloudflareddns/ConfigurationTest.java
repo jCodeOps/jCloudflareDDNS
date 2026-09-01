@@ -210,6 +210,33 @@ class ConfigurationTest {
     }
 
     @Test
+    void validatesAllProfilesAndReportsEveryResult() throws Exception {
+        Path path = write("""
+                profiles:
+                  home:
+                    zone: example.com
+                    record: home.example.com
+                    ttl: 300
+                    tokenEnv: CLOUDFLARE_HOME_TOKEN
+                  office:
+                    zone: example.net
+                    record: office.example.net
+                    ttl: 0
+                    tokenEnv: CLOUDFLARE_OFFICE_TOKEN
+                """);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ByteArrayOutputStream errors = new ByteArrayOutputStream();
+
+        int exitCode = JCloudflareDdnsApplication.execute(
+                new String[]{"validate", "--config", path.toString(), "--all"},
+                new PrintWriter(output, true), new PrintWriter(errors, true));
+
+        assertEquals(ExitCodes.VALIDATION_ERROR, exitCode);
+        assertTrue(output.toString(StandardCharsets.UTF_8).contains("Profile 'home' is valid."));
+        assertTrue(errors.toString(StandardCharsets.UTF_8).contains("Profile 'office': Error:"));
+    }
+
+    @Test
     void validateCommandReturnsSuccessForValidConfiguration() throws Exception {
         Path path = write("""
                 zone: example.com

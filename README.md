@@ -54,6 +54,8 @@ Profile execution is currently one profile per invocation. The `execution`
 section is validated now; processing all profiles and bounded parallel execution
 will be enabled in a later phase.
 
+Configuration validation can inspect every profile sequentially with `--all`.
+
 Future stages may add logging, scheduling, daemon mode, and packaging. None of those features should be assumed available in this release.
 
 ## Development
