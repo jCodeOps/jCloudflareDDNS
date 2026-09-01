@@ -70,7 +70,8 @@ public final class UpdateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        try {
+        try (ExecutionLock executionLock = ExecutionLock.acquire(configPath)) {
+            executionLock.isHeld();
             if (dryRun && apply) {
                 errorOut("Options --dry-run and --apply cannot be used together.");
                 return ExitCodes.USAGE_ERROR;

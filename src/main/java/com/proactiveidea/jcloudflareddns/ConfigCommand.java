@@ -21,7 +21,8 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
 /** Configuration-related commands. */
-@Command(name = "config", description = "Create and inspect configuration files.",
+@Command(name = "config", mixinStandardHelpOptions = true,
+        description = "Create and inspect configuration files.",
         subcommands = ConfigCommand.ConfigInitCommand.class)
 public final class ConfigCommand implements Callable<Integer> {
 
@@ -34,7 +35,8 @@ public final class ConfigCommand implements Callable<Integer> {
         return ExitCodes.USAGE_ERROR;
     }
 
-    @Command(name = "init", description = "Create a non-secret configuration template.")
+    @Command(name = "init", mixinStandardHelpOptions = true,
+            description = "Create a non-secret configuration template.")
     static final class ConfigInitCommand implements Callable<Integer> {
 
         @Option(names = {"-o", "--output"}, arity = "0..1", fallbackValue = "config.yml",

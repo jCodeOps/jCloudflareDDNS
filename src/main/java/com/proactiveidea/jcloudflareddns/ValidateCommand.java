@@ -38,7 +38,8 @@ public final class ValidateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        try {
+        try (ExecutionLock executionLock = ExecutionLock.acquire(configPath)) {
+            executionLock.isHeld();
             if (all && profile != null) {
                 spec.commandLine().getErr().println("Options --all and --profile cannot be used together.");
                 return ExitCodes.USAGE_ERROR;

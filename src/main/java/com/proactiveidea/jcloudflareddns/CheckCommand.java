@@ -51,7 +51,8 @@ public final class CheckCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        try {
+        try (ExecutionLock executionLock = ExecutionLock.acquire(configPath)) {
+            executionLock.isHeld();
             if (all && profile != null) {
                 errorOut("Options --all and --profile cannot be used together.");
                 return ExitCodes.USAGE_ERROR;

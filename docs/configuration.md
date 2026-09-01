@@ -95,3 +95,8 @@ Use `mode: parallel` with an optional `maxConcurrency` from 1 through 16.
 Values from 1 through 8 are recommended. Values from 9 through 16 are allowed
 with a warning because they may increase resource usage. When omitted, parallel
 mode uses two workers. Sequential mode does not need a `maxConcurrency` value.
+
+Each command acquires a lock next to the configuration file for the duration
+of its execution. A second invocation using the same configuration exits with
+a controlled error instead of overlapping the first run. The lock file is
+`<config>.jcloudflareddns.lock` and contains no credentials.

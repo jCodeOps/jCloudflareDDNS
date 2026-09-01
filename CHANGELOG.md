@@ -15,6 +15,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 - Added bounded parallel execution for `check --all` and `update --all`.
 - Added an 8-worker recommended concurrency limit with warnings for higher values.
 - Added `config init` to create a secure non-secret starter configuration.
+- Added per-configuration execution locking to prevent overlapping runs.
 - Added portable manual installation guidance, with FreeBSD as the first validation target.
 - Added portable `tar.gz` and `zip` distribution archives with a POSIX launcher.
 - Added a non-destructive, prefix-configurable manual installer for FreeBSD.
