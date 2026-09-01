@@ -15,9 +15,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /** Loads non-secret configuration from YAML. */
@@ -43,12 +45,12 @@ public final class ConfigurationLoader {
 
         try {
             String yaml = Files.readString(path, StandardCharsets.UTF_8);
-            rejectSecretKeys(yaml);
-            Configuration configuration = mapper.readValue(yaml, Configuration.class);
-            if (configuration == null) {
+            JsonNode document = mapper.readTree(yaml);
+            rejectSecretKeys(document);
+            if (document == null || document.isNull()) {
                 throw new ConfigurationException("Configuration file is empty.");
             }
-            return configuration;
+            return mapper.treeToValue(document, Configuration.class);
         } catch (ConfigurationException exception) {
             throw exception;
         } catch (IOException | RuntimeException exception) {
@@ -56,18 +58,32 @@ public final class ConfigurationLoader {
         }
     }
 
-    private static void rejectSecretKeys(String yaml) throws ConfigurationException {
-        String[] lines = yaml.split("\\R");
-        for (String line : lines) {
-            String key = line.stripLeading().split(":", 2)[0].trim();
-            if (key.equalsIgnoreCase("token")
-                    || key.equalsIgnoreCase("apiToken")
-                    || key.equalsIgnoreCase("globalApiKey")
-                    || key.equalsIgnoreCase("password")
-                    || key.equalsIgnoreCase("secret")) {
-                throw new ConfigurationException(
-                        "Configuration must not contain secret values; use tokenEnv instead.");
+    private static void rejectSecretKeys(JsonNode node) throws ConfigurationException {
+        if (node == null) {
+            return;
+        }
+        if (node.isObject()) {
+            Iterator<String> fields = node.fieldNames();
+            while (fields.hasNext()) {
+                String field = fields.next();
+                if (isSecretKey(field)) {
+                    throw new ConfigurationException(
+                            "Configuration must not contain secret values; use tokenEnv instead.");
+                }
+                rejectSecretKeys(node.get(field));
+            }
+        } else if (node.isArray()) {
+            for (JsonNode item : node) {
+                rejectSecretKeys(item);
             }
         }
+    }
+
+    private static boolean isSecretKey(String key) {
+        return key.equalsIgnoreCase("token")
+                || key.equalsIgnoreCase("apiToken")
+                || key.equalsIgnoreCase("globalApiKey")
+                || key.equalsIgnoreCase("password")
+                || key.equalsIgnoreCase("secret");
     }
 }

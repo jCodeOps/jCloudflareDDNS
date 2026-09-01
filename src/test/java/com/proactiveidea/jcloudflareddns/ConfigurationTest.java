@@ -92,6 +92,26 @@ class ConfigurationTest {
     }
 
     @Test
+    void rejectsNestedSecretsWithoutIncludingTheirValues() throws Exception {
+        Path path = write("""
+                zone: example.com
+                record: host.example.com
+                ttl: 300
+                tokenEnv: CLOUDFLARE_API_TOKEN
+                metadata:
+                  credentials:
+                    apiToken: nested-secret
+                """);
+
+        ConfigurationException exception = assertThrows(
+                ConfigurationException.class,
+                () -> new ConfigurationLoader().load(path));
+
+        assertTrue(exception.getMessage().contains("must not contain secret values"));
+        assertFalse(exception.getMessage().contains("nested-secret"));
+    }
+
+    @Test
     void rejectsUnknownConfigurationProperties() throws Exception {
         Path path = write("""
                 zone: example.com
