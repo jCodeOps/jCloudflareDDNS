@@ -4,6 +4,8 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+## 0.1.0-RC1 - 2026-09-01
+
 - Aligned repository rules and release documentation with the implemented CLI.
 - Added weekly Dependabot monitoring for Maven dependencies and GitHub Actions.
 - Added reproducible CycloneDX JSON and XML SBOM files to portable distributions.

@@ -2,9 +2,9 @@
 
 ## Current status
 
-jCloudflareDDNS is an unreleased development snapshot. The CLI and portable
-archives are validated, but no stable version, release tag, or published package
-exists yet.
+jCloudflareDDNS 0.1.0-RC1 is an unpublished release candidate. The CLI and
+portable archives are validated, but no stable version, release tag, or
+published package exists yet.
 
 ## Stable release gates
 
