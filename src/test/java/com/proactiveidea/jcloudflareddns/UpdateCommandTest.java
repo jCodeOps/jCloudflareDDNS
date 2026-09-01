@@ -93,6 +93,39 @@ class UpdateCommandTest {
         assertEquals(0, cloudflare.updateCalls);
     }
 
+    @Test
+    void dryRunProcessesAllProfilesSequentially() throws Exception {
+        Path config = Files.writeString(temporaryDirectory.resolve("profiles.yml"), """
+                profiles:
+                  home:
+                    zone: example.com
+                    record: home.example.com
+                    ttl: 300
+                    tokenEnv: CLOUDFLARE_HOME_TOKEN
+                  office:
+                    zone: example.net
+                    record: office.example.net
+                    ttl: 600
+                    tokenEnv: CLOUDFLARE_OFFICE_TOKEN
+                """, StandardCharsets.UTF_8);
+        RecordingCloudflareClient cloudflare = new RecordingCloudflareClient("198.51.100.10");
+        PublicIpResolver resolver = new PublicIpResolver(
+                java.net.http.HttpClient.newHttpClient(),
+                URI.create("http://localhost:" + server.getAddress().getPort() + "/ip"));
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+
+        int exitCode = new CommandLine(new UpdateCommand(resolver, cloudflare))
+                .setOut(new PrintWriter(stdout, true))
+                .setErr(new PrintWriter(stderr, true))
+                .execute("--config", config.toString(), "--all");
+
+        assertEquals(ExitCodes.SUCCESS, exitCode);
+        String output = stdout.toString(StandardCharsets.UTF_8);
+        assertTrue(output.contains("Profile 'home':"));
+        assertTrue(output.contains("Profile 'office':"));
+    }
+
     private Path configuration() throws IOException {
         return Files.writeString(temporaryDirectory.resolve("config.yml"), """
                 zone: example.com

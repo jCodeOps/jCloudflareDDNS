@@ -50,9 +50,9 @@ For multiple DNS targets, one YAML file may define shared `defaults` and named
 jcloudflareddns validate --config config.yml --profile home
 ```
 
-Profile execution is currently one profile per invocation. The `execution`
-section is validated now; processing all profiles and bounded parallel execution
-will be enabled in a later phase.
+`check --all` and `update --all` process every profile sequentially. The
+`execution` section is still validated, but bounded parallel execution will be
+enabled in a later phase.
 
 Configuration validation can inspect every profile sequentially with `--all`.
 
