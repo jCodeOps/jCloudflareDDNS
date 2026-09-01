@@ -10,9 +10,6 @@ package com.proactiveidea.jcloudflareddns;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.Callable;
 
 import com.proactiveidea.jcloudflareddns.api.AuthenticationException;
@@ -43,7 +40,7 @@ public final class CheckCommand implements Callable<Integer> {
     @Option(names = "--profile", description = "Named configuration profile to execute.")
     private String profile;
 
-    @Option(names = "--all", description = "Check every named profile sequentially.")
+    @Option(names = "--all", description = "Check every named profile using the configured execution mode.")
     private boolean all;
 
     @Spec
@@ -70,41 +67,11 @@ public final class CheckCommand implements Callable<Integer> {
     private int checkAll() throws ConfigurationException {
         Map<String, Configuration> profiles = new ConfigurationLoader().loadAll(configPath);
         ExecutionConfiguration execution = new ConfigurationLoader().loadExecution(configPath);
-        if (execution.mode().equals("sequential")) {
-            return checkSequentially(profiles);
-        }
         if (execution.exceedsRecommendedConcurrency()) {
             errorOut("Warning: execution.maxConcurrency above 8 may increase resource usage.");
         }
-        try (ExecutorService executor = Executors.newFixedThreadPool(execution.workerCount())) {
-            var futures = profiles.entrySet().stream()
-                    .map(entry -> executor.submit(() -> checkOne(entry.getValue(), entry.getKey())))
-                    .toList();
-            return collectResults(futures);
-        }
-    }
-
-    private int checkSequentially(Map<String, Configuration> profiles) {
-        int result = ExitCodes.SUCCESS;
-        for (Map.Entry<String, Configuration> entry : profiles.entrySet()) {
-            result = combine(result, checkOne(entry.getValue(), entry.getKey()));
-        }
-        return result;
-    }
-
-    private int collectResults(java.util.List<Future<Integer>> futures) throws ConfigurationException {
-        int result = ExitCodes.SUCCESS;
-        try {
-            for (Future<Integer> future : futures) {
-                result = combine(result, future.get());
-            }
-            return result;
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new ConfigurationException("Profile execution was interrupted.", exception);
-        } catch (java.util.concurrent.ExecutionException exception) {
-            throw new ConfigurationException("Profile execution failed unexpectedly.", exception.getCause());
-        }
+        return new ProfileExecutor().execute(profiles, execution,
+                (profileName, configuration) -> checkOne(configuration, profileName));
     }
 
     private int checkOne(Configuration configuration, String profileName) {
@@ -157,10 +124,6 @@ public final class CheckCommand implements Callable<Integer> {
             errorOut(profileName, "Cloudflare API returned an invalid IP record.");
             return ExitCodes.API_ERROR;
         }
-    }
-
-    private static int combine(int current, int next) {
-        return current == ExitCodes.SUCCESS ? next : current;
     }
 
     private void output(String profileName, String message) {
