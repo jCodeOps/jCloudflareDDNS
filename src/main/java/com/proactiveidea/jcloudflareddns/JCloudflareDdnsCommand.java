@@ -26,7 +26,8 @@ import picocli.CommandLine.Model.CommandSpec;
         subcommands = {
                 CheckCommand.class,
                 UpdateCommand.class,
-                ValidateCommand.class
+                ValidateCommand.class,
+                ConfigCommand.class
         }
 )
 public final class JCloudflareDdnsCommand implements Callable<Integer> {

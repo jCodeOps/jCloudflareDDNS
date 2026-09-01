@@ -4,6 +4,15 @@ jCloudflareDDNS reads a non-secret YAML configuration file. The API Token is
 never stored in this file; `tokenEnv` names the environment variable from which
 the one-shot CLI obtains it.
 
+Create a starter file without storing a token:
+
+```sh
+jcloudflareddns config init --output config.yml
+```
+
+Use `--profile`, `--zone`, `--record`, and `--token-env` to customize the
+generated profile. Existing files are never overwritten.
+
 ## Fields
 
 ```yaml

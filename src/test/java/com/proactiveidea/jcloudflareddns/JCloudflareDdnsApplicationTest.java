@@ -17,10 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class JCloudflareDdnsApplicationTest {
+
+    @TempDir
+    Path temporaryDirectory;
 
     @Test
     void helpReturnsSuccessAndListsCommands() {
@@ -70,6 +76,20 @@ class JCloudflareDdnsApplicationTest {
 
         assertEquals(ExitCodes.USAGE_ERROR, result.exitCode());
         assertTrue(result.stderr().contains("Unknown option"));
+    }
+
+    @Test
+    void configInitCreatesANonSecretTemplate() throws Exception {
+        Path output = temporaryDirectory.resolve("config.yml");
+
+        CliResult result = execute("config", "init", "--output", output.toString(),
+                "--profile", "home", "--zone", "example.com", "--record", "home.example.com");
+
+        String config = Files.readString(output, StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.SUCCESS, result.exitCode());
+        assertTrue(config.contains("profiles:"));
+        assertTrue(config.contains("tokenEnv: CLOUDFLARE_API_TOKEN"));
+        assertTrue(!config.contains("apiToken:"));
     }
 
     private static CliResult execute(String... args) {

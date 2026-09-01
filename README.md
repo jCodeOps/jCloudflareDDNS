@@ -43,6 +43,9 @@ The configuration can be validated with `jcloudflareddns validate --config confi
 
 See the [configuration guide](docs/configuration.md) for the complete schema and retry behavior.
 
+To create a starter multi-profile configuration without storing a token, run
+`jcloudflareddns config init --output config.yml`.
+
 For multiple DNS targets, one YAML file may define shared `defaults` and named
 `profiles`. Select a profile with `--profile`, for example:
 
