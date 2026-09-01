@@ -11,7 +11,7 @@
 
 package com.proactiveidea.jcloudflareddns.network;
 
-/** Raised when the public IP provider cannot return a valid IPv4 address. */
+/** Raised when no configured public IP provider returns a valid address. */
 public final class PublicIpException extends Exception {
 
     private static final long serialVersionUID = 1L;

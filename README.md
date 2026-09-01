@@ -26,9 +26,18 @@ record: host.example.com
 ttl: 300
 proxied: false
 tokenEnv: CLOUDFLARE_API_TOKEN
-ipProviderUrl: https://api.ipify.org
+useDefaultIpProviders: true
+# Optional additional providers, tried after the built-in defaults:
+# ipProviderUrls:
+#   - https://my-company.example/public-ip
 ipVersion: ipv4
 ```
+
+By default, the resolver uses two HTTPS providers for the selected address family.
+Set `useDefaultIpProviders: false` to use only the ordered URLs in `ipProviderUrls`.
+Configured URLs are useful for adding an organization-controlled provider or for
+fully replacing the defaults. Provider failures are bounded and transient network
+failures are retried briefly; a future timer remains responsible for later runs.
 
 The configuration can be validated with `jcloudflareddns validate --config config.yml` when running the CLI. The `tokenEnv` value names the environment variable used to obtain the API Token; never place a token in the YAML file.
 

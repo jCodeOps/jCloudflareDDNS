@@ -49,7 +49,12 @@ public final class ConfigurationValidator {
         } else if (!ENVIRONMENT_VARIABLE.matcher(configuration.tokenEnv()).matches()) {
             errors.add("tokenEnv must be a valid uppercase environment variable name.");
         }
-        validateIpProviderUrl(configuration.ipProviderUrl(), errors);
+        if (!configuration.useDefaultIpProviders() && configuration.ipProviderUrls().isEmpty()) {
+            errors.add("At least one ipProviderUrls entry is required when useDefaultIpProviders is false.");
+        }
+        for (String providerUrl : configuration.ipProviderUrls()) {
+            validateIpProviderUrl(providerUrl, errors);
+        }
         try {
             IpVersion.fromConfiguration(configuration.ipVersion());
         } catch (IllegalArgumentException exception) {
@@ -59,20 +64,16 @@ public final class ConfigurationValidator {
     }
 
     private static void validateIpProviderUrl(String value, List<String> errors) {
-        if (value == null) {
-            errors.add("ipProviderUrl is required.");
-            return;
-        }
         try {
             URI uri = URI.create(value);
             if (!"https".equalsIgnoreCase(uri.getScheme())
                     || uri.getHost() == null
                     || uri.getRawQuery() != null
                     || uri.getRawFragment() != null) {
-                errors.add("ipProviderUrl must be an HTTPS URL without a query or fragment.");
+                errors.add("Each ipProviderUrls entry must be an HTTPS URL without a query or fragment.");
             }
         } catch (IllegalArgumentException exception) {
-            errors.add("ipProviderUrl must be a valid HTTPS URL.");
+            errors.add("Each ipProviderUrls entry must be a valid HTTPS URL.");
         }
     }
 

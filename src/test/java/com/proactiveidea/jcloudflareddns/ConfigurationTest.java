@@ -39,7 +39,8 @@ class ConfigurationTest {
                 ttl: 300
                 proxied: false
                 tokenEnv: CLOUDFLARE_API_TOKEN
-                ipProviderUrl: https://api.ipify.org
+                ipProviderUrls:
+                  - https://api.ipify.org
                 """);
 
         Configuration configuration = new ConfigurationLoader().load(path);
@@ -59,7 +60,8 @@ class ConfigurationTest {
                 record: other.net
                 ttl: 0
                 tokenEnv: lowercase-name
-                ipProviderUrl: https://api.ipify.org
+                ipProviderUrls:
+                  - https://api.ipify.org
                 """);
 
         Configuration configuration = new ConfigurationLoader().load(path);
@@ -96,11 +98,48 @@ class ConfigurationTest {
                 record: host.example.com
                 ttl: 300
                 tokenEnv: CLOUDFLARE_API_TOKEN
-                ipProviderUrl: https://api.ipify.org
+                ipProviderUrls:
+                  - https://api.ipify.org
                 unsupported: true
                 """);
 
         assertThrows(ConfigurationException.class, () -> new ConfigurationLoader().load(path));
+    }
+
+    @Test
+    void acceptsMultipleConfiguredProviders() throws Exception {
+        Path path = write("""
+                zone: example.com
+                record: host.example.com
+                ttl: 300
+                tokenEnv: CLOUDFLARE_API_TOKEN
+                useDefaultIpProviders: false
+                ipProviderUrls:
+                  - https://one.example/ip
+                  - https://two.example/ip
+                """);
+
+        Configuration configuration = new ConfigurationLoader().load(path);
+
+        assertEquals(List.of("https://one.example/ip", "https://two.example/ip"),
+                configuration.ipProviderUrls());
+        assertTrue(new ConfigurationValidator().validate(configuration).isEmpty());
+    }
+
+    @Test
+    void requiresAConfiguredProviderWhenDefaultsAreDisabled() throws Exception {
+        Path path = write("""
+                zone: example.com
+                record: host.example.com
+                ttl: 300
+                tokenEnv: CLOUDFLARE_API_TOKEN
+                useDefaultIpProviders: false
+                """);
+
+        Configuration configuration = new ConfigurationLoader().load(path);
+
+        assertTrue(new ConfigurationValidator().validate(configuration).contains(
+                "At least one ipProviderUrls entry is required when useDefaultIpProviders is false."));
     }
 
     @Test
@@ -110,7 +149,8 @@ class ConfigurationTest {
                 record: host.example.com
                 ttl: 300
                 tokenEnv: CLOUDFLARE_API_TOKEN
-                ipProviderUrl: https://api.ipify.org
+                ipProviderUrls:
+                  - https://api.ipify.org
                 """);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -130,7 +170,8 @@ class ConfigurationTest {
                 record: other.net
                 ttl: 0
                 tokenEnv: invalid-name
-                ipProviderUrl: https://api.ipify.org
+                ipProviderUrls:
+                  - https://api.ipify.org
                 """);
 
         int exitCode = JCloudflareDdnsApplication.execute(

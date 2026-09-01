@@ -11,6 +11,8 @@
 
 package com.proactiveidea.jcloudflareddns;
 
+import java.util.List;
+
 /** Immutable non-secret application configuration. */
 public record Configuration(
         String zone,
@@ -18,14 +20,19 @@ public record Configuration(
         Integer ttl,
         Boolean proxied,
         String tokenEnv,
-        String ipProviderUrl,
+        List<String> ipProviderUrls,
+        Boolean useDefaultIpProviders,
         String ipVersion) {
 
     public Configuration {
         zone = trimToNull(zone);
         record = trimToNull(record);
         tokenEnv = trimToNull(tokenEnv);
-        ipProviderUrl = trimToNull(ipProviderUrl);
+        ipProviderUrls = ipProviderUrls == null ? List.of() : ipProviderUrls.stream()
+                .map(Configuration::trimToNull)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+        useDefaultIpProviders = useDefaultIpProviders == null || useDefaultIpProviders;
         ipVersion = ipVersion == null || ipVersion.isBlank() ? "ipv4" : ipVersion.trim().toLowerCase();
         proxied = proxied == null ? Boolean.FALSE : proxied;
     }

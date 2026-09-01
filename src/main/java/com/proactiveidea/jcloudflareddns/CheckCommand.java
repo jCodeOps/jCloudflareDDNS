@@ -11,7 +11,6 @@
 
 package com.proactiveidea.jcloudflareddns;
 
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
@@ -26,6 +25,7 @@ import com.proactiveidea.jcloudflareddns.network.IpAddress;
 import com.proactiveidea.jcloudflareddns.network.IpVersion;
 import com.proactiveidea.jcloudflareddns.network.PublicIpException;
 import com.proactiveidea.jcloudflareddns.network.PublicIpResolver;
+import com.proactiveidea.jcloudflareddns.network.PublicIpProviders;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -54,7 +54,9 @@ public final class CheckCommand implements Callable<Integer> {
 
             IpVersion ipVersion = IpVersion.fromConfiguration(configuration.ipVersion());
             PublicIpResolver ipResolver = new PublicIpResolver(
-                    URI.create(configuration.ipProviderUrl()), ipVersion);
+                    java.net.http.HttpClient.newHttpClient(),
+                    PublicIpProviders.select(configuration.ipProviderUrls(),
+                            configuration.useDefaultIpProviders(), ipVersion), ipVersion);
             CloudflareApiClient cloudflare = new CloudflareHttpClient(
                     new EnvironmentApiTokenProvider(configuration.tokenEnv()));
             IpAddress publicIp = ipResolver.resolve();

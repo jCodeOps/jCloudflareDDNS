@@ -100,7 +100,8 @@ class UpdateCommandTest {
                 ttl: 300
                 proxied: false
                 tokenEnv: CLOUDFLARE_API_TOKEN
-                ipProviderUrl: https://example.com/ip
+                ipProviderUrls:
+                  - https://example.com/ip
                 """, StandardCharsets.UTF_8);
     }
 

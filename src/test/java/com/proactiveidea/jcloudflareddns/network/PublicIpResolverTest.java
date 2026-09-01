@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,13 +31,18 @@ class PublicIpResolverTest {
     private HttpServer server;
     private int responseStatus;
     private String responseBody;
+    private String fallbackResponseBody;
+    private int responseCount;
 
     @BeforeEach
     void startServer() throws IOException {
         responseStatus = 200;
         responseBody = "198.51.100.10\n";
+        fallbackResponseBody = "203.0.113.20\n";
+        responseCount = 0;
         server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
         server.createContext("/ip", this::respond);
+        server.createContext("/fallback", this::respond);
         server.start();
     }
 
@@ -78,6 +85,28 @@ class PublicIpResolverTest {
     }
 
     @Test
+    void retriesTransientProviderFailuresWithinTheBound() {
+        responseStatus = 503;
+
+        assertThrows(PublicIpException.class, () -> resolver().resolve());
+        assertEquals(2, responseCount);
+    }
+
+    @Test
+    void fallsBackToTheNextProviderAfterAInvalidResponse() throws Exception {
+        responseBody = "not-an-ip\n";
+        IpAddress address = new PublicIpResolver(
+                java.net.http.HttpClient.newHttpClient(),
+                List.of(
+                        URI.create("http://localhost:" + server.getAddress().getPort() + "/ip"),
+                        URI.create("http://localhost:" + server.getAddress().getPort() + "/fallback")),
+                IpVersion.IPV4).resolve();
+
+        assertEquals("203.0.113.20", address.value());
+        assertEquals(2, responseCount);
+    }
+
+    @Test
     void validatesIpv4WithoutDnsResolution() {
         assertEquals("0.0.0.0", IpAddress.parse("0.0.0.0").value());
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("01.2.3.4"));
@@ -94,7 +123,10 @@ class PublicIpResolverTest {
     }
 
     private void respond(HttpExchange exchange) throws IOException {
-        byte[] bytes = responseBody.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        responseCount++;
+        String body = exchange.getHttpContext().getPath().equals("/fallback")
+                ? fallbackResponseBody : responseBody;
+        byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         exchange.sendResponseHeaders(responseStatus, bytes.length);
         try (var output = exchange.getResponseBody()) {
             output.write(bytes);
