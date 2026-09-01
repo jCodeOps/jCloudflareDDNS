@@ -65,6 +65,13 @@ class CloudflareHttpClientTest {
     }
 
     @Test
+    void findsZonesWithoutDnsCaseSensitivity() throws Exception {
+        Zone zone = client().findZone("EXAMPLE.COM");
+
+        assertEquals("zone-id", zone.id());
+    }
+
+    @Test
     void listsRecordsUsingTheRequestedFilters() throws Exception {
         CloudflareApiClient client = client();
 

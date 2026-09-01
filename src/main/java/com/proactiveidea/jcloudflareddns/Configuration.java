@@ -12,6 +12,7 @@
 package com.proactiveidea.jcloudflareddns;
 
 import java.util.List;
+import java.util.Locale;
 
 /** Immutable non-secret application configuration. */
 public record Configuration(
@@ -25,15 +26,16 @@ public record Configuration(
         String ipVersion) {
 
     public Configuration {
-        zone = trimToNull(zone);
-        record = trimToNull(record);
+        zone = normalizeDnsName(zone);
+        record = normalizeDnsName(record);
         tokenEnv = trimToNull(tokenEnv);
         ipProviderUrls = ipProviderUrls == null ? List.of() : ipProviderUrls.stream()
                 .map(Configuration::trimToNull)
                 .filter(java.util.Objects::nonNull)
                 .toList();
         useDefaultIpProviders = useDefaultIpProviders == null || useDefaultIpProviders;
-        ipVersion = ipVersion == null || ipVersion.isBlank() ? "ipv4" : ipVersion.trim().toLowerCase();
+        ipVersion = ipVersion == null || ipVersion.isBlank()
+                ? "ipv4" : ipVersion.trim().toLowerCase(Locale.ROOT);
         proxied = proxied == null ? Boolean.FALSE : proxied;
     }
 
@@ -43,5 +45,10 @@ public record Configuration(
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static String normalizeDnsName(String value) {
+        String normalized = trimToNull(value);
+        return normalized == null ? null : normalized.toLowerCase(Locale.ROOT);
     }
 }

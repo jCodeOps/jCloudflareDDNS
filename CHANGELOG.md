@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Normalized DNS names independently of the system locale.
 - Documented portable distribution validation on Debian 13.
 - Added direct CLI coverage for matching and differing DNS check results.
 - Added bounded retries for transient read-only Cloudflare API failures.

@@ -54,6 +54,18 @@ class ConfigurationTest {
     }
 
     @Test
+    void normalizesDnsNamesIndependentlyOfTheSystemLocale() {
+        Configuration configuration = new Configuration(
+                "EXAMPLE.COM", "Host.Example.COM", 300, false,
+                "CLOUDFLARE_API_TOKEN", List.of(), true, "IPV4");
+
+        assertEquals("example.com", configuration.zone());
+        assertEquals("host.example.com", configuration.record());
+        assertEquals("ipv4", configuration.ipVersion());
+        assertTrue(new ConfigurationValidator().validate(configuration).isEmpty());
+    }
+
+    @Test
     void reportsInvalidConfigurationFields() throws Exception {
         Path path = write("""
                 zone: example.com

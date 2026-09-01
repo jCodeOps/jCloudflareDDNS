@@ -74,7 +74,7 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
     public Zone findZone(String name) throws CloudflareApiException, AuthenticationException {
         List<Zone> zones = list("/zones?name=" + queryValue(name), Zone.class);
         return zones.stream()
-                .filter(zone -> name.equals(zone.name()))
+                .filter(zone -> name.equalsIgnoreCase(zone.name()))
                 .findFirst()
                 .orElseThrow(() -> new CloudflareApiException("Cloudflare zone was not found.", 404));
     }
@@ -86,7 +86,7 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
                 + "/dns_records?name=" + queryValue(name)
                 + "&type=" + queryValue(type);
         return list(path, DnsRecord.class).stream()
-                .filter(record -> name.equals(record.name()) && type.equals(record.type()))
+                .filter(record -> name.equalsIgnoreCase(record.name()) && type.equalsIgnoreCase(record.type()))
                 .toList();
     }
 
