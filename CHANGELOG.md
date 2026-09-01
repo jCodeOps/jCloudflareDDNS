@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Added a controlled, non-sensitive error boundary for unexpected CLI failures.
 - Added a Linux/JDK 25 GitHub Actions verification workflow with a portable distribution smoke test.
 - Normalized DNS names independently of the system locale.
 - Documented portable distribution validation on Debian 13.

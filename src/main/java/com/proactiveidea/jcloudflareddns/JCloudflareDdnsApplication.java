@@ -32,9 +32,19 @@ public final class JCloudflareDdnsApplication {
 
     /** Executes the CLI without terminating the hosting process. */
     public static int execute(String[] args, PrintWriter out, PrintWriter err) {
-        CommandLine commandLine = new CommandLine(new JCloudflareDdnsCommand());
+        return createCommandLine(new JCloudflareDdnsCommand(), out, err)
+                .execute(Arrays.copyOf(args, args.length));
+    }
+
+    static CommandLine createCommandLine(Object command, PrintWriter out, PrintWriter err) {
+        CommandLine commandLine = new CommandLine(command);
         commandLine.setOut(out);
         commandLine.setErr(err);
-        return commandLine.execute(Arrays.copyOf(args, args.length));
+        commandLine.setExecutionExceptionHandler((exception, line, parseResult) -> {
+            line.getErr().printf("Unexpected application error (%s).%n",
+                    exception.getClass().getSimpleName());
+            return ExitCodes.FAILURE;
+        });
+        return commandLine;
     }
 }

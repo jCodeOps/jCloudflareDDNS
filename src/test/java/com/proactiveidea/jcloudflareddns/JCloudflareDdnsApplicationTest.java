@@ -19,9 +19,13 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
 
 class JCloudflareDdnsApplicationTest {
 
@@ -104,6 +108,22 @@ class JCloudflareDdnsApplicationTest {
         assertTrue(Files.notExists(output));
     }
 
+    @Test
+    void unexpectedCommandFailureReturnsAControlledErrorWithoutItsMessage() {
+        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        CommandLine commandLine = JCloudflareDdnsApplication.createCommandLine(
+                new FailingCommand(),
+                new PrintWriter(stdout, true), new PrintWriter(stderr, true));
+
+        int exitCode = commandLine.execute();
+
+        String error = stderr.toString(StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.FAILURE, exitCode);
+        assertTrue(error.contains("Unexpected application error (IllegalStateException)."));
+        assertTrue(!error.contains("sensitive diagnostic value"));
+    }
+
     private static CliResult execute(String... args) {
         ByteArrayOutputStream stdout = new ByteArrayOutputStream();
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
@@ -118,5 +138,14 @@ class JCloudflareDdnsApplicationTest {
     }
 
     private record CliResult(int exitCode, String stdout, String stderr) {
+    }
+
+    @Command(name = "failing")
+    static final class FailingCommand implements Callable<Integer> {
+
+        @Override
+        public Integer call() {
+            throw new IllegalStateException("sensitive diagnostic value");
+        }
     }
 }
