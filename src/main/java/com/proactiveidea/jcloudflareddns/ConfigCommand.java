@@ -90,7 +90,7 @@ public final class ConfigCommand implements Callable<Integer> {
                         "profile must contain only letters, digits, hyphens, and underscores.");
             }
             List<String> errors = new ConfigurationValidator().validate(new Configuration(
-                    zone, record, 300, false, tokenEnv, List.of(), true, "ipv4"));
+                    zone, record, 300, true, tokenEnv, List.of(), true, "ipv4"));
             if (!errors.isEmpty()) {
                 throw new IllegalArgumentException(errors.getFirst());
             }
@@ -102,7 +102,7 @@ public final class ConfigCommand implements Callable<Integer> {
                       mode: sequential
                     defaults:
                       ttl: 300
-                      proxied: false
+                      proxied: true
                       ipVersion: ipv4
                       useDefaultIpProviders: true
                     profiles:

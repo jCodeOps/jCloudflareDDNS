@@ -36,7 +36,7 @@ public record Configuration(
         useDefaultIpProviders = useDefaultIpProviders == null || useDefaultIpProviders;
         ipVersion = ipVersion == null || ipVersion.isBlank()
                 ? "ipv4" : ipVersion.trim().toLowerCase(Locale.ROOT);
-        proxied = proxied == null ? Boolean.FALSE : proxied;
+        proxied = proxied == null ? Boolean.TRUE : proxied;
     }
 
     private static String trimToNull(String value) {

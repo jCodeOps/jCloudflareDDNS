@@ -19,7 +19,7 @@ generated profile. Existing files are never overwritten.
 zone: example.com
 record: host.example.com
 ttl: 300
-proxied: false
+proxied: true
 tokenEnv: CLOUDFLARE_API_TOKEN
 useDefaultIpProviders: true
 ipProviderUrls:
@@ -30,7 +30,7 @@ ipVersion: ipv4
 - `zone`: Cloudflare zone name.
 - `record`: fully qualified DNS record name inside the zone.
 - `ttl`: TTL in seconds, from 1 through 86400.
-- `proxied`: whether the Cloudflare record is proxied; defaults to `false`.
+- `proxied`: whether the Cloudflare record is proxied; defaults to `true`.
 - `tokenEnv`: uppercase environment variable name containing the API Token.
 - `useDefaultIpProviders`: uses the two built-in HTTPS providers for the selected
   IP family when `true` or omitted.
@@ -65,7 +65,7 @@ One file may define shared defaults and named profiles:
 ```yaml
 defaults:
   ttl: 300
-  proxied: false
+  proxied: true
   ipVersion: ipv4
 
 profiles:

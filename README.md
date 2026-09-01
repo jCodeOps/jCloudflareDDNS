@@ -24,7 +24,7 @@ An example non-secret configuration is:
 zone: example.com
 record: host.example.com
 ttl: 300
-proxied: false
+proxied: true
 tokenEnv: CLOUDFLARE_API_TOKEN
 useDefaultIpProviders: true
 # Optional additional providers, tried after the built-in defaults:

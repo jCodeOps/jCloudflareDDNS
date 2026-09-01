@@ -54,6 +54,18 @@ class ConfigurationTest {
     }
 
     @Test
+    void defaultsToAProxiedRecordWhenTheSettingIsOmitted() throws Exception {
+        Path path = write("""
+                zone: example.com
+                record: host.example.com
+                ttl: 300
+                tokenEnv: CLOUDFLARE_API_TOKEN
+                """);
+
+        assertTrue(new ConfigurationLoader().load(path).proxied());
+    }
+
+    @Test
     void normalizesDnsNamesIndependentlyOfTheSystemLocale() {
         Configuration configuration = new Configuration(
                 "EXAMPLE.COM", "Host.Example.COM", 300, false,
