@@ -20,6 +20,8 @@ The normal build requires JDK 25 and uses the Maven Wrapper:
 
 The same command is expected to work on FreeBSD and supported Linux distributions. The CLI must not require a shell, service manager, database, or web server.
 
+GitHub Actions continuously verifies the Maven build and portable archive on Linux with JDK 25. FreeBSD remains validated on a dedicated VM because it is not available as a GitHub-hosted runner.
+
 ## FreeBSD validation checklist
 
 Before a release, validate on a supported FreeBSD VM:

@@ -63,7 +63,7 @@ Future stages may add logging, scheduling, daemon mode, and packaging. None of t
 
 ## Development
 
-Install JDK 25 and follow the [installation guide](docs/installation.md), then run `./mvnw clean verify`. `./mvnw package` also creates portable `tar.gz` and `zip` distribution archives under `target/`.
+Install JDK 25 and follow the [installation guide](docs/installation.md), then run `./mvnw clean verify`. `./mvnw package` also creates portable `tar.gz` and `zip` distribution archives under `target/`. GitHub Actions repeats this verification on Linux with JDK 25 and smoke-tests the portable `tar.gz` archive.
 
 ## License and independence
 
