@@ -4,6 +4,10 @@
 
 jCloudflareDDNS is a plain Java, one-shot CLI. FreeBSD is the first platform validation target, followed by Linux distributions. The application must use Java and portable filesystem and networking APIs rather than operating-system-specific assumptions.
 
+The current distribution was smoke-tested on FreeBSD 15.1-RELEASE-p3 amd64
+with OpenJDK 25.0.3. This confirms the portable launcher and local configuration
+workflow; it is not yet a stable-release support commitment.
+
 The normal build requires JDK 25 and uses the Maven Wrapper:
 
 ```sh

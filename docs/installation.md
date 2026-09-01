@@ -19,6 +19,10 @@ cd jCloudflareDDNS
 
 After extracting the generated `target/jcloudflareddns-0.1.0-SNAPSHOT-distribution.tar.gz`, run `bin/jcloudflareddns --help` from the extracted directory. The launcher uses `JAVA_HOME` when set, otherwise it resolves `java` from `PATH`.
 
+The current distribution has been smoke-tested on FreeBSD 15.1-RELEASE-p3
+amd64 with OpenJDK 25.0.3. Stable support will require repeatable validation
+across the documented release workflow.
+
 For a FreeBSD installation under a chosen prefix, run the repository installer as root:
 
 ```sh
