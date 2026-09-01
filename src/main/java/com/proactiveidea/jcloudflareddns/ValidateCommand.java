@@ -44,6 +44,7 @@ public final class ValidateCommand implements Callable<Integer> {
                 return ExitCodes.USAGE_ERROR;
             }
             if (all) {
+                warnIfHighConcurrency();
                 return validateAll();
             }
             Configuration configuration = new ConfigurationLoader().load(configPath, profile);
@@ -57,6 +58,14 @@ public final class ValidateCommand implements Callable<Integer> {
         } catch (ConfigurationException exception) {
             spec.commandLine().getErr().println("Error: " + exception.getMessage());
             return ExitCodes.VALIDATION_ERROR;
+        }
+    }
+
+    private void warnIfHighConcurrency() throws ConfigurationException {
+        ExecutionConfiguration execution = new ConfigurationLoader().loadExecution(configPath);
+        if (execution.exceedsRecommendedConcurrency()) {
+            spec.commandLine().getErr().println(
+                    "Warning: execution.maxConcurrency above 8 may increase resource usage.");
         }
     }
 

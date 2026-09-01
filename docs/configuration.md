@@ -83,5 +83,6 @@ execution:
 ```
 
 Use `mode: parallel` with an optional `maxConcurrency` from 1 through 16.
-When omitted, parallel mode uses two workers. Sequential mode does not need a
-`maxConcurrency` value.
+Values from 1 through 8 are recommended. Values from 9 through 16 are allowed
+with a warning because they may increase resource usage. When omitted, parallel
+mode uses two workers. Sequential mode does not need a `maxConcurrency` value.

@@ -95,8 +95,10 @@ public final class UpdateCommand implements Callable<Integer> {
         if (execution.mode().equals("sequential")) {
             return updateSequentially(profiles);
         }
-        int concurrency = execution.maxConcurrency() == null ? 2 : execution.maxConcurrency();
-        try (ExecutorService executor = Executors.newFixedThreadPool(concurrency)) {
+        if (execution.exceedsRecommendedConcurrency()) {
+            errorOut("Warning: execution.maxConcurrency above 8 may increase resource usage.");
+        }
+        try (ExecutorService executor = Executors.newFixedThreadPool(execution.workerCount())) {
             var futures = profiles.entrySet().stream()
                     .map(entry -> executor.submit(() -> updateOne(entry.getValue(), entry.getKey())))
                     .toList();

@@ -143,7 +143,8 @@ public final class ConfigurationLoader {
             throw new ConfigurationException("execution.mode must be sequential or parallel.");
         }
         if (execution.maxConcurrency() != null
-                && (execution.maxConcurrency() < 1 || execution.maxConcurrency() > 16)) {
+                && (execution.maxConcurrency() < 1
+                        || execution.maxConcurrency() > ExecutionConfiguration.ABSOLUTE_MAX_CONCURRENCY)) {
             throw new ConfigurationException("execution.maxConcurrency must be between 1 and 16.");
         }
         if (execution.mode().equals("sequential")
