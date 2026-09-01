@@ -270,9 +270,9 @@ class CloudflareHttpClientTest {
         requestBody.set(new String(exchange.getRequestBody().readAllBytes()));
         String path = exchange.getRequestURI().getPath();
         if (path.endsWith("/zones") && "GET".equals(exchange.getRequestMethod())) {
-            respond(exchange, 200, "{\"success\":true,\"result\":[{\"id\":\"zone-id\",\"name\":\"example.com\",\"status\":\"active\"}]}");
+            respond(exchange, 200, "{\"success\":true,\"result\":[{\"id\":\"zone-id\",\"name\":\"example.com\",\"status\":\"active\",\"paused\":false}]}");
         } else if (path.endsWith("/dns_records") && "GET".equals(exchange.getRequestMethod())) {
-            respond(exchange, 200, "{\"success\":true,\"result\":[{\"id\":\"record-id\",\"name\":\"host.example.com\",\"type\":\"A\",\"content\":\"198.51.100.10\",\"ttl\":300,\"proxied\":false}]}");
+            respond(exchange, 200, "{\"success\":true,\"result\":[{\"id\":\"record-id\",\"name\":\"host.example.com\",\"type\":\"A\",\"content\":\"198.51.100.10\",\"ttl\":300,\"proxied\":false,\"comment\":\"managed externally\"}]}");
         } else if (path.endsWith("/record-id") && "PATCH".equals(exchange.getRequestMethod())) {
             respond(exchange, 200, "{\"success\":true,\"result\":{\"id\":\"record-id\",\"name\":\"host.example.com\",\"type\":\"A\",\"content\":\"198.51.100.11\",\"ttl\":300,\"proxied\":false}}");
         } else {

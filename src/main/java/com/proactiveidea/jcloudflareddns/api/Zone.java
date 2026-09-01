@@ -11,6 +11,9 @@
 
 package com.proactiveidea.jcloudflareddns.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /** Minimal Cloudflare zone representation used by the API client. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Zone(String id, String name, String status) {
 }

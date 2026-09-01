@@ -11,7 +11,10 @@
 
 package com.proactiveidea.jcloudflareddns.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /** Minimal Cloudflare DNS record representation. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record DnsRecord(
         String id,
         String name,
