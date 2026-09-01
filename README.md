@@ -41,6 +41,8 @@ failures are retried briefly; a future timer remains responsible for later runs.
 
 The configuration can be validated with `jcloudflareddns validate --config config.yml` when running the CLI. The `tokenEnv` value names the environment variable used to obtain the API Token; never place a token in the YAML file.
 
+See the [configuration guide](docs/configuration.md) for the complete schema and retry behavior.
+
 Future stages may add logging, scheduling, daemon mode, and packaging. None of those features should be assumed available in this release.
 
 ## Development
