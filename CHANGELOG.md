@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Documented portable distribution validation on Debian 13.
 - Added direct CLI coverage for matching and differing DNS check results.
 - Added bounded retries for transient read-only Cloudflare API failures.
 - Bounded Cloudflare and public IP HTTP response bodies to limit memory use.

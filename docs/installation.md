@@ -39,6 +39,10 @@ Run the application from the compiled classes as documented in the root README. 
 
 The same source-build procedure is intended for supported Linux distributions. Distribution packages, systemd units, and native executables are future work and are not required for the current CLI.
 
+The portable distribution has been smoke-tested on Debian 13.1 amd64 with
+OpenJDK 25.0.4.1. Extract the generated archive and run the included POSIX
+launcher as described for FreeBSD; no system service is required.
+
 ## Configuration permissions
 
 Configuration files must contain only non-secret settings. Store the API Token in the environment variable named by `tokenEnv`. If a future deployment stores configuration under a system directory, it must use restrictive ownership and permissions and must not embed credentials.

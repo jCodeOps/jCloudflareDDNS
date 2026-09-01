@@ -8,6 +8,10 @@ The current distribution was smoke-tested on FreeBSD 15.1-RELEASE-p3 amd64
 with OpenJDK 25.0.3. This confirms the portable launcher and local configuration
 workflow; it is not yet a stable-release support commitment.
 
+The same distribution was smoke-tested on Debian 13.1 amd64 with OpenJDK
+25.0.4.1. This validates the portable JVM workflow on the first Linux target;
+it does not introduce Debian packaging or systemd integration.
+
 The normal build requires JDK 25 and uses the Maven Wrapper:
 
 ```sh
