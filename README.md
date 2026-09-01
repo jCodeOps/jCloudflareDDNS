@@ -80,5 +80,7 @@ Licensed under the [Apache License 2.0](LICENSE). Copyright 2026 Proactive Idea.
 
 Portable distributions include runtime dependency notices in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+They also include CycloneDX SBOM files, `jcloudflareddns-sbom.json` and
+`jcloudflareddns-sbom.xml`, for the packaged runtime components.
 
 jCloudflareDDNS is an independent project and is not affiliated with or endorsed by Cloudflare, Inc.

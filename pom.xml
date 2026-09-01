@@ -44,6 +44,7 @@
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
         <junit.version>5.12.2</junit.version>
         <picocli.version>4.7.7</picocli.version>
         <jackson.version>2.22.2</jackson.version>
@@ -107,6 +108,29 @@
                                     <version>[25,)</version>
                                 </requireJavaVersion>
                             </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
+                <version>2.9.2</version>
+                <executions>
+                    <execution>
+                        <id>create-sbom</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>makeBom</goal>
+                        </goals>
+                        <configuration>
+                            <projectType>application</projectType>
+                            <includeBomSerialNumber>false</includeBomSerialNumber>
+                            <includeTestScope>false</includeTestScope>
+                            <outputFormat>all</outputFormat>
+                            <outputName>${project.artifactId}-sbom</outputName>
+                            <outputTimestamp>${project.build.outputTimestamp}</outputTimestamp>
+                            <skipAttach>true</skipAttach>
                         </configuration>
                     </execution>
                 </executions>

@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Added reproducible CycloneDX JSON and XML SBOM files to portable distributions.
 - Added runtime dependency attribution notices to portable distributions.
 - Added safe `--verbose` and `--debug` CLI diagnostics, plus public bug-reporting information.
 - Added a controlled, non-sensitive error boundary for unexpected CLI failures.

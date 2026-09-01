@@ -37,6 +37,8 @@ jobs:
           tar -xzf "$archive" -C "$distribution_directory"
           launcher="$(find "$distribution_directory" -type f -path '*/bin/jcloudflareddns' -print -quit)"
           test -n "$launcher"
+          test -f "$(dirname "$(dirname "$launcher")")/jcloudflareddns-sbom.json"
+          test -f "$(dirname "$(dirname "$launcher")")/jcloudflareddns-sbom.xml"
           "$launcher" --version
           "$launcher" config init --output "$distribution_directory/config.yml"
           "$launcher" validate --config "$distribution_directory/config.yml" --all
