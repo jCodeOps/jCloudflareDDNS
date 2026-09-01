@@ -4,6 +4,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Added runtime dependency attribution notices to portable distributions.
 - Added safe `--verbose` and `--debug` CLI diagnostics, plus public bug-reporting information.
 - Added a controlled, non-sensitive error boundary for unexpected CLI failures.
 - Added a Linux/JDK 25 GitHub Actions verification workflow with a portable distribution smoke test.

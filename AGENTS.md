@@ -9,6 +9,7 @@
 - Linux and FreeBSD are first-class targets; keep filesystem, process, and networking assumptions portable.
 - Cloudflare API Tokens are the supported authentication mechanism. Never use Global API Keys in new functionality.
 - Keep configuration and secrets separate. Never commit, print, expose, or log API tokens or other secrets.
+- Review and update `THIRD-PARTY-NOTICES.md` when changing packaged runtime dependencies.
 - All code, comments, documentation, configuration names, logs, commits, and user-facing CLI text must be in English.
 
 ## Structure and Quality

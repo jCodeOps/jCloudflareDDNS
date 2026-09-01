@@ -78,4 +78,7 @@ the safe diagnostic output and the application version.
 
 Licensed under the [Apache License 2.0](LICENSE). Copyright 2026 Proactive Idea. Author: Jenny Cabrera Varona.
 
+Portable distributions include runtime dependency notices in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 jCloudflareDDNS is an independent project and is not affiliated with or endorsed by Cloudflare, Inc.
