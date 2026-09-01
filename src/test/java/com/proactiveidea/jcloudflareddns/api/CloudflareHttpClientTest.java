@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
@@ -172,13 +173,89 @@ class CloudflareHttpClientTest {
         assertTrue(!exception.getMessage().contains(oversizedValue));
     }
 
+    @Test
+    void retriesTransientGetResponses() throws Exception {
+        AtomicInteger requests = new AtomicInteger();
+        server.removeContext("/client/v4");
+        server.createContext("/client/v4", exchange -> {
+            if (requests.incrementAndGet() < 3) {
+                respond(exchange, 503, "{\"success\":false,\"errors\":[]}");
+            } else {
+                respond(exchange, 200,
+                        "{\"success\":true,\"result\":[{\"id\":\"zone-id\",\"name\":\"example.com\",\"status\":\"active\"}]}");
+            }
+        });
+
+        Zone zone = client(new CloudflareRetryPolicy(3, java.time.Duration.ZERO)).findZone("example.com");
+
+        assertEquals("zone-id", zone.id());
+        assertEquals(3, requests.get());
+    }
+
+    @Test
+    void retriesRateLimitedGetResponsesUsingRetryAfter() throws Exception {
+        AtomicInteger requests = new AtomicInteger();
+        server.removeContext("/client/v4");
+        server.createContext("/client/v4", exchange -> {
+            if (requests.incrementAndGet() == 1) {
+                exchange.getResponseHeaders().add("Retry-After", "0");
+                respond(exchange, 429, "{\"success\":false,\"errors\":[]}");
+            } else {
+                respond(exchange, 200,
+                        "{\"success\":true,\"result\":[{\"id\":\"zone-id\",\"name\":\"example.com\",\"status\":\"active\"}]}");
+            }
+        });
+
+        Zone zone = client(new CloudflareRetryPolicy(2, java.time.Duration.ZERO)).findZone("example.com");
+
+        assertEquals("zone-id", zone.id());
+        assertEquals(2, requests.get());
+    }
+
+    @Test
+    void defersLongRateLimitDelaysToTheNextExecution() throws Exception {
+        AtomicInteger requests = new AtomicInteger();
+        server.removeContext("/client/v4");
+        server.createContext("/client/v4", exchange -> {
+            requests.incrementAndGet();
+            exchange.getResponseHeaders().add("Retry-After", "6");
+            respond(exchange, 429, "{\"success\":false,\"errors\":[]}");
+        });
+
+        assertThrows(CloudflareApiException.class, () -> client(new CloudflareRetryPolicy(3, java.time.Duration.ZERO))
+                .findZone("example.com"));
+
+        assertEquals(1, requests.get());
+    }
+
+    @Test
+    void doesNotRetryPatchResponses() throws Exception {
+        AtomicInteger requests = new AtomicInteger();
+        server.removeContext("/client/v4");
+        server.createContext("/client/v4", exchange -> {
+            requests.incrementAndGet();
+            respond(exchange, 503, "{\"success\":false,\"errors\":[]}");
+        });
+
+        assertThrows(CloudflareApiException.class, () -> client(new CloudflareRetryPolicy(3, java.time.Duration.ZERO))
+                .updateRecord("zone-id", "record-id",
+                        new DnsRecordUpdate("host.example.com", "A", "198.51.100.11", 300, false)));
+
+        assertEquals(1, requests.get());
+    }
+
     private CloudflareApiClient client() {
+        return client(CloudflareRetryPolicy.defaults());
+    }
+
+    private CloudflareApiClient client(CloudflareRetryPolicy retryPolicy) {
         URI baseUri = URI.create("http://localhost:" + server.getAddress().getPort() + "/client/v4");
         return new CloudflareHttpClient(
                 HttpClient.newHttpClient(),
                 baseUri,
                 () -> "test-token".toCharArray(),
-                new ObjectMapper());
+                new ObjectMapper(),
+                retryPolicy);
     }
 
     private void handleRequest(HttpExchange exchange) throws IOException {

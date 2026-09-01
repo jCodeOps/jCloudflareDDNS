@@ -36,11 +36,13 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
     private static final int MAX_LIST_PAGES = 100;
     private static final int MAX_RESPONSE_BYTES = 1_048_576;
+    private static final Duration MAX_RETRY_AFTER_DELAY = Duration.ofSeconds(5);
 
     private final HttpClient httpClient;
     private final URI baseUri;
     private final ApiTokenProvider tokenProvider;
     private final ObjectMapper mapper;
+    private final CloudflareRetryPolicy retryPolicy;
 
     public CloudflareHttpClient(ApiTokenProvider tokenProvider) {
         this(HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build(),
@@ -52,10 +54,20 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
             URI baseUri,
             ApiTokenProvider tokenProvider,
             ObjectMapper mapper) {
+        this(httpClient, baseUri, tokenProvider, mapper, CloudflareRetryPolicy.defaults());
+    }
+
+    public CloudflareHttpClient(
+            HttpClient httpClient,
+            URI baseUri,
+            ApiTokenProvider tokenProvider,
+            ObjectMapper mapper,
+            CloudflareRetryPolicy retryPolicy) {
         this.httpClient = Objects.requireNonNull(httpClient, "httpClient");
         this.baseUri = normalizeBaseUri(Objects.requireNonNull(baseUri, "baseUri"));
         this.tokenProvider = Objects.requireNonNull(tokenProvider, "tokenProvider");
         this.mapper = Objects.requireNonNull(mapper, "mapper");
+        this.retryPolicy = Objects.requireNonNull(retryPolicy, "retryPolicy");
     }
 
     @Override
@@ -117,33 +129,86 @@ public final class CloudflareHttpClient implements CloudflareApiClient {
         String tokenValue = new String(token);
         java.util.Arrays.fill(token, '\0');
         try {
-            HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(baseUri + path))
-                    .timeout(REQUEST_TIMEOUT)
-                    .header("Accept", "application/json")
-                    .header("Authorization", "Bearer " + tokenValue);
-            if (body == null) {
-                request.method(method, HttpRequest.BodyPublishers.noBody());
-            } else {
-                request.header("Content-Type", "application/json")
-                        .method(method, HttpRequest.BodyPublishers.ofString(body));
+            HttpRequest request = createRequest(method, path, body, tokenValue);
+            for (int attempt = 1; attempt <= retryPolicy.maxAttempts(); attempt++) {
+                try {
+                    HttpResponse<InputStream> response = httpClient.send(
+                            request, HttpResponse.BodyHandlers.ofInputStream());
+                    try (InputStream responseBody = response.body()) {
+                        Duration retryDelay = retryDelay(method, response, attempt);
+                        if (retryDelay != null) {
+                            pauseBeforeRetry(retryDelay);
+                            continue;
+                        }
+                        return parseResponse(response.statusCode(),
+                                BoundedResponseBody.read(responseBody, MAX_RESPONSE_BYTES, StandardCharsets.UTF_8));
+                    } catch (BoundedResponseBody.ResponseTooLargeException exception) {
+                        throw new CloudflareApiException(
+                                "Cloudflare API response exceeded the maximum size.", response.statusCode(), exception);
+                    }
+                } catch (IOException exception) {
+                    if (isReadRequest(method) && attempt < retryPolicy.maxAttempts()) {
+                        pauseBeforeRetry(retryPolicy.delayForRetry(attempt));
+                        continue;
+                    }
+                    throw new CloudflareApiException("Cloudflare API request failed.", 0, exception);
+                }
             }
-            HttpResponse<InputStream> response = httpClient.send(
-                    request.build(), HttpResponse.BodyHandlers.ofInputStream());
-            try (InputStream responseBody = response.body()) {
-                return parseResponse(response.statusCode(),
-                        BoundedResponseBody.read(responseBody, MAX_RESPONSE_BYTES, StandardCharsets.UTF_8));
-            } catch (BoundedResponseBody.ResponseTooLargeException exception) {
-                throw new CloudflareApiException(
-                        "Cloudflare API response exceeded the maximum size.", response.statusCode(), exception);
-            }
-        } catch (IOException exception) {
-            throw new CloudflareApiException("Cloudflare API request failed.", 0, exception);
+            throw new CloudflareApiException("Cloudflare API request retry state was invalid.", 0);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new CloudflareApiException("Cloudflare API request was interrupted.", 0, exception);
         } finally {
             tokenValue = "";
         }
+    }
+
+    private HttpRequest createRequest(String method, String path, String body, String tokenValue) {
+        HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(baseUri + path))
+                .timeout(REQUEST_TIMEOUT)
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + tokenValue);
+        if (body == null) {
+            return request.method(method, HttpRequest.BodyPublishers.noBody()).build();
+        }
+        return request.header("Content-Type", "application/json")
+                .method(method, HttpRequest.BodyPublishers.ofString(body))
+                .build();
+    }
+
+    private Duration retryDelay(String method, HttpResponse<?> response, int attempt) {
+        if (!isReadRequest(method) || attempt >= retryPolicy.maxAttempts()
+                || !isRetryableStatus(response.statusCode())) {
+            return null;
+        }
+        java.util.Optional<Duration> retryAfter = response.headers().firstValue("Retry-After")
+                .flatMap(CloudflareHttpClient::parseRetryAfter);
+        if (retryAfter.isPresent()) {
+            Duration delay = retryAfter.get();
+            return delay.compareTo(MAX_RETRY_AFTER_DELAY) <= 0 ? delay : null;
+        }
+        return retryPolicy.delayForRetry(attempt);
+    }
+
+    private static boolean isReadRequest(String method) {
+        return method.equals("GET");
+    }
+
+    private static boolean isRetryableStatus(int statusCode) {
+        return statusCode == 408 || statusCode == 409 || statusCode == 429 || statusCode >= 500;
+    }
+
+    private static java.util.Optional<Duration> parseRetryAfter(String value) {
+        try {
+            long seconds = Long.parseLong(value.trim());
+            return seconds < 0 ? java.util.Optional.empty() : java.util.Optional.of(Duration.ofSeconds(seconds));
+        } catch (NumberFormatException | ArithmeticException exception) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    private static void pauseBeforeRetry(Duration delay) throws InterruptedException {
+        Thread.sleep(delay);
     }
 
     private CloudflareResponse parseResponse(int statusCode, String responseBody) throws CloudflareApiException {
