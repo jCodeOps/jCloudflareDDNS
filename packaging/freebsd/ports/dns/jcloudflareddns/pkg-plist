@@ -1,4 +1,7 @@
 bin/jcloudflareddns
+@sample(root,jcloudflareddns,0640) %%ETCDIR%%/config.yml.sample
+@(jcloudflareddns,jcloudflareddns,0600) %%ETCDIR%%/config.yml.jcloudflareddns.lock
+@sample(root,jcloudflareddns,0640) %%ETCDIR%%/tokens.env.sample
 %%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-annotations-2.22.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-core-2.22.2.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-databind-2.22.2.jar
@@ -6,6 +9,7 @@ bin/jcloudflareddns
 %%JAVASHAREDIR%%/jcloudflareddns/lib/jcloudflareddns-0.1.0.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/picocli-4.7.7.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/snakeyaml-2.5.jar
+libexec/jcloudflareddns-run
 %%DOCSDIR%%/CHANGELOG.md
 %%DOCSDIR%%/LICENSE
 %%DOCSDIR%%/README.md
@@ -14,3 +18,4 @@ bin/jcloudflareddns
 %%DOCSDIR%%/jcloudflareddns-sbom.xml
 @dir %%JAVASHAREDIR%%/jcloudflareddns/lib
 @dir %%JAVASHAREDIR%%/jcloudflareddns
+@dir(root,jcloudflareddns,0750) %%ETCDIR%%

@@ -2,7 +2,7 @@
 
 FreeBSD is the first platform validation target for jCloudflareDDNS.
 
-No native executable, service script, or daemon integration exists yet. The project provides a portable distribution archive, a manual installer, and a development FreeBSD `.pkg` builder; all require Java 25. Future packaging must preserve portable paths, explicit permissions, API Token isolation, and the CLI's exit-code contract.
+No native executable is provided yet. The project provides a portable distribution archive, a manual installer, a development FreeBSD `.pkg` builder, and an opt-in `rc.d` integration in the Ports candidate; all require Java 25. Packaging preserves portable paths, explicit permissions, API Token isolation, and the CLI's exit-code contract.
 
 The current manual installation procedure is documented in [`docs/installation.md`](../../docs/installation.md). A future FreeBSD package may provide an installed launcher and fixed filesystem layout, but it must not require Linux utilities or systemd.
 
@@ -25,6 +25,7 @@ pkg add packages/jcloudflareddns-0.1.0.pkg
 The package requires Java 25, installs the launcher under `/usr/local/bin`, and keeps the versioned application under `/usr/local/share`.
 Both FreeBSD scripts verify that the archive has the expected single-root layout before extracting it.
 
-`ports/dns/jcloudflareddns` contains the RC1 candidate for the FreeBSD Ports
+`ports/dns/jcloudflareddns` contains the 0.1.0 candidate for the FreeBSD Ports
 Collection. It packages the portable archive as a Java application and does not
-use these development scripts.
+use these development scripts. Its optional service uses FreeBSD `daemon(8)` to
+run the one-shot CLI every 300 seconds by default; it does not keep a JVM alive.

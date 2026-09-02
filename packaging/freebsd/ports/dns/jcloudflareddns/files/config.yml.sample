@@ -1,0 +1,13 @@
+defaults:
+  ttl: 300
+  proxied: true
+  ipVersion: ipv4
+
+execution:
+  mode: sequential
+
+profiles:
+  home:
+    zone: example.com
+    record: home.example.com
+    tokenEnv: CLOUDFLARE_HOME_TOKEN

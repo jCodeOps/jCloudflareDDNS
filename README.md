@@ -60,7 +60,7 @@ execution mode. Sequential mode is the default; parallel mode uses the bounded
 
 Configuration validation can inspect every profile sequentially with `--all`.
 
-Future stages may add scheduling, daemon mode, native-image builds, and distribution-specific packages. The current portable distribution and FreeBSD Ports candidate do not install a service or scheduler.
+Future stages may add native-image builds and additional distribution-specific packages. The portable distribution does not install a scheduler. The FreeBSD Ports candidate includes an optional, disabled-by-default `rc.d` supervisor that repeatedly invokes the one-shot CLI without keeping a JVM resident.
 
 ## Development
 
