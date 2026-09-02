@@ -145,7 +145,7 @@ public final class UpdateCommand implements Callable<Integer> {
             }
             cloudflare.updateRecord(zone.id(), record.id(), new DnsRecordUpdate(
                     record.name(), ipVersion.recordType(), publicIp.value(),
-                    configuration.ttl(), configuration.proxied()));
+                    desiredTtl(configuration), configuration.proxied()));
             output(profileName, "Updated " + record.name() + " from " + record.content()
                     + " to " + publicIp.value() + ".");
             return ExitCodes.SUCCESS;
@@ -171,8 +171,12 @@ public final class UpdateCommand implements Callable<Integer> {
     private static boolean recordMatchesConfiguration(
             DnsRecord record, IpAddress recordIp, IpAddress publicIp, Configuration configuration) {
         return publicIp.value().equals(recordIp.value())
-                && configuration.ttl().equals(record.ttl())
+                && desiredTtl(configuration) == record.ttl()
                 && configuration.proxied().equals(record.proxied());
+    }
+
+    private static int desiredTtl(Configuration configuration) {
+        return configuration.proxied() ? 1 : configuration.ttl();
     }
 
     private void output(String profileName, String message) {

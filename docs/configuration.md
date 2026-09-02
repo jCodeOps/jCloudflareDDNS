@@ -29,7 +29,9 @@ ipVersion: ipv4
 
 - `zone`: Cloudflare zone name.
 - `record`: fully qualified DNS record name inside the zone.
-- `ttl`: TTL in seconds, from 1 through 86400.
+- `ttl`: TTL in seconds, from 1 through 86400 for unproxied records. Cloudflare
+  requires `Auto` (API value `1`) for proxied records, so the configured TTL is
+  ignored while `proxied` is `true`.
 - `proxied`: whether the Cloudflare record is proxied; defaults to `true`.
 - `tokenEnv`: uppercase environment variable name containing the API Token.
 - `useDefaultIpProviders`: uses the two built-in HTTPS providers for the selected

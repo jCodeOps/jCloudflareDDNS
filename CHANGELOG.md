@@ -5,6 +5,7 @@ All notable changes to jCloudflareDDNS will be documented here.
 ## Unreleased
 
 - Defaulted Cloudflare DNS updates to proxied records unless configuration explicitly disables it.
+- Reconciled proxied Cloudflare records with their required automatic TTL.
 - Added a FreeBSD Ports candidate for the 0.1.0-RC1 portable archive.
 
 ## 0.1.0-RC1 - 2026-09-01

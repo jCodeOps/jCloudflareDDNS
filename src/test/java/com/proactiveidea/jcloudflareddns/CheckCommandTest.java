@@ -84,6 +84,14 @@ class CheckCommandTest {
     }
 
     @Test
+    void acceptsCloudflareAutoTtlForAProxiedRecord() throws Exception {
+        CliResult result = execute(new DnsRecord(
+                "record-id", "host.example.com", "A", "198.51.100.11", 1, true));
+
+        assertEquals(ExitCodes.SUCCESS, result.exitCode());
+    }
+
+    @Test
     void identifiesInvalidCloudflareRecordContent() throws Exception {
         CliResult result = execute("not-an-ip-address");
 
@@ -93,7 +101,7 @@ class CheckCommandTest {
     }
 
     private CliResult execute(String currentContent) throws Exception {
-        return execute(new DnsRecord("record-id", "host.example.com", "A", currentContent, 300, true));
+        return execute(new DnsRecord("record-id", "host.example.com", "A", currentContent, 1, true));
     }
 
     private CliResult execute(DnsRecord record) throws Exception {

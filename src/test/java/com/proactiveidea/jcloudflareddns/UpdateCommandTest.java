@@ -104,6 +104,24 @@ class UpdateCommandTest {
     }
 
     @Test
+    void usesCloudflareAutoTtlForProxiedRecords() throws Exception {
+        Path config = Files.writeString(temporaryDirectory.resolve("proxied.yml"), """
+                zone: example.com
+                record: host.example.com
+                ttl: 300
+                proxied: true
+                tokenEnv: CLOUDFLARE_API_TOKEN
+                """, StandardCharsets.UTF_8);
+        RecordingCloudflareClient cloudflare = new RecordingCloudflareClient("198.51.100.10", 300, false);
+        CliResult result = execute(config, cloudflare, false);
+
+        assertEquals(ExitCodes.SUCCESS, result.exitCode());
+        assertEquals(1, cloudflare.updateCalls);
+        assertEquals(1, cloudflare.lastUpdate.ttl());
+        assertTrue(cloudflare.lastUpdate.proxied());
+    }
+
+    @Test
     void doesNotUpdateWhenCloudflareRecordContentIsInvalid() throws Exception {
         RecordingCloudflareClient cloudflare = new RecordingCloudflareClient("not-an-ip-address");
         CliResult result = execute(configuration(), cloudflare, false);

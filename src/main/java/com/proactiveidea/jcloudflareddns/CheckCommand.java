@@ -155,8 +155,12 @@ public final class CheckCommand implements Callable<Integer> {
     private static boolean recordMatchesConfiguration(
             DnsRecord record, IpAddress recordIp, IpAddress publicIp, Configuration configuration) {
         return publicIp.value().equals(recordIp.value())
-                && configuration.ttl().equals(record.ttl())
+                && desiredTtl(configuration) == record.ttl()
                 && configuration.proxied().equals(record.proxied());
+    }
+
+    private static int desiredTtl(Configuration configuration) {
+        return configuration.proxied() ? 1 : configuration.ttl();
     }
 
     private void output(String profileName, String message) {
