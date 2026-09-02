@@ -124,6 +124,7 @@ class PublicIpResolverTest {
     void validatesIpv4WithoutDnsResolution() {
         assertEquals("0.0.0.0", IpAddress.parse("0.0.0.0").value());
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("01.2.3.4"));
+        assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("-1.2.3.4"));
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("256.2.3.4"));
         assertThrows(IllegalArgumentException.class, () -> IpAddress.parse("2001:db8::1"));
         assertEquals("2001:db8::1", IpAddress.parse("2001:0DB8:0:0:0:0:0:1", IpVersion.IPV6).value());

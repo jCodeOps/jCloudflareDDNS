@@ -54,7 +54,8 @@ public record IpAddress(IpVersion version, String value) {
                 throw new IllegalArgumentException("Invalid IPv4 address.");
             }
             try {
-                if (Integer.parseInt(part) > 255) {
+                int numericValue = Integer.parseInt(part);
+                if (numericValue < 0 || numericValue > 255) {
                     throw new IllegalArgumentException("Invalid IPv4 address.");
                 }
             } catch (NumberFormatException exception) {

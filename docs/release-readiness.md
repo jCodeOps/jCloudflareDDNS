@@ -14,6 +14,9 @@ exists yet.
 - Generate the final archive only after freezing release documentation and
   record its exact SHA-256 in the matching Ports `distinfo`; do not reuse an
   artifact after release-content changes.
+- Publish the archive SHA-256 alongside the release. Verify it before using
+  the manual installer, which is intentionally separate from the Ports
+  framework checksum verification.
 - Run the full Maven verification and distribution smoke test.
 - Perform controlled end-to-end Cloudflare tests for IPv4 and IPv6 with
   least-privilege tokens that are never stored in the repository.
@@ -32,6 +35,7 @@ exists yet.
 - Keep configuration non-secret; do not install tokens or create a service.
 - Pass `make stage`, `stage-qa`, `package`, `install`, `deinstall`, and
   `portlint -A`, then validate with `poudriere testport` in clean jails.
+- Run `make package` as a normal user for the frozen release artifact.
 
 The manual installer and local package builder are development tools. They are
 not substitutes for a submitted FreeBSD Port.

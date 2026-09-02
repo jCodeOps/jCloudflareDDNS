@@ -4,6 +4,9 @@ All notable changes to jCloudflareDDNS will be documented here.
 
 ## Unreleased
 
+- Rejected negative IPv4 octets during public IP and DNS record validation.
+- Clarified release integrity checks and documented the complete DNS record
+  reconciliation behavior.
 - Defaulted Cloudflare DNS updates to proxied records unless configuration explicitly disables it.
 - Reconciled proxied Cloudflare records with their required automatic TTL.
 - Added a FreeBSD Ports candidate for the 0.1.0-RC1 portable archive.

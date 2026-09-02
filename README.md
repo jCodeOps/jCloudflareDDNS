@@ -16,7 +16,7 @@ The project is intentionally CLI-oriented and uses one-shot execution. FreeBSD i
 
 ## CLI foundation
 
-The current CLI exposes `--help`, `--version`, and the commands `check`, `update`, and `validate`. `validate` checks a local YAML configuration file, `check` resolves the configured public IP version and queries the matching Cloudflare record, and `update` performs a one-shot DNS update when the addresses differ. `update` is a dry run by default; pass `--apply` to write to Cloudflare.
+The current CLI exposes `--help`, `--version`, and the commands `check`, `update`, and `validate`. `validate` checks a local YAML configuration file, `check` resolves the configured public IP version and queries the matching Cloudflare record, and `update` reconciles the record's address, proxy setting, and applicable TTL in one shot. `update` is a dry run by default; pass `--apply` to write to Cloudflare.
 
 An example non-secret configuration is:
 
@@ -59,7 +59,7 @@ execution mode. Sequential mode is the default; parallel mode uses the bounded
 
 Configuration validation can inspect every profile sequentially with `--all`.
 
-Future stages may add logging, scheduling, daemon mode, and packaging. None of those features should be assumed available in this release.
+Future stages may add scheduling, daemon mode, native-image builds, and distribution-specific packages. The current portable distribution and FreeBSD Ports candidate do not install a service or scheduler.
 
 ## Development
 
