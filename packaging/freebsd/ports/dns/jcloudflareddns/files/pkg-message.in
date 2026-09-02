@@ -8,12 +8,6 @@ Review %%ETCDIR%%/config.yml and add the corresponding API Tokens to
 %%ETCDIR%%/tokens.env. Keep both files owned by root:jcloudflareddns; the token
 file must have mode 0640 or stricter.
 
-When upgrading from 0.1.0, existing operator files retain their ownership.
-Grant the new service account read access before enabling the service:
-
-  chown root:jcloudflareddns %%ETCDIR%%/config.yml %%ETCDIR%%/tokens.env
-  chmod 0640 %%ETCDIR%%/config.yml %%ETCDIR%%/tokens.env
-
 Validate the configuration before enabling automatic updates:
 
   jcloudflareddns validate --config %%ETCDIR%%/config.yml --all
@@ -22,6 +16,17 @@ Validate the configuration before enabling automatic updates:
 The default interval is 300 seconds. Override it with jcloudflareddns_interval
 in rc.conf; accepted values are 60 through 31536000 seconds. Service output is
 sent to syslog with the jcloudflareddns tag.
+EOM
+}
+{ type: upgrade
+  maximum_version: "0.1.1"
+  message: <<EOM
+Version 0.1.1 adds an optional service account. Existing operator files retain
+their ownership during the upgrade. Grant the account read access before
+enabling the service:
+
+  chown root:jcloudflareddns %%ETCDIR%%/config.yml %%ETCDIR%%/tokens.env
+  chmod 0640 %%ETCDIR%%/config.yml %%ETCDIR%%/tokens.env
 EOM
 }
 ]
