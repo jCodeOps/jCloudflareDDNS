@@ -41,6 +41,19 @@ them owned by `root:jcloudflareddns` with mode `0640`. `config.yml` contains
 only non-secret settings; `tokens.env` contains `NAME=value` assignments that
 match each profile's `tokenEnv`.
 
+When upgrading from 0.1.0, `pkg` deliberately preserves the ownership of
+existing operator files. Before enabling the new service, grant its account
+read access without making either file writable by that account:
+
+```sh
+chown root:jcloudflareddns \
+    /usr/local/etc/jcloudflareddns/config.yml \
+    /usr/local/etc/jcloudflareddns/tokens.env
+chmod 0640 \
+    /usr/local/etc/jcloudflareddns/config.yml \
+    /usr/local/etc/jcloudflareddns/tokens.env
+```
+
 Use exactly one uppercase `NAME=value` assignment per line in `tokens.env`.
 Blank lines and lines beginning with `#` are accepted. Do not use `export`,
 shell quoting, command substitution, or variable expansion: the file is parsed

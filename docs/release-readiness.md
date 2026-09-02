@@ -2,12 +2,9 @@
 
 ## Current status
 
-jCloudflareDDNS 0.1.0 was published on 2026-09-02 with immutable release
-assets and SHA-256 checksums. Its FreeBSD Ports candidate passed `make stage`,
-`stage-qa`, `check-plist`, `package`, `install`, `deinstall`, `portlint -A`,
-and `poudriere testport` on FreeBSD 15.1-RELEASE-p3 with OpenJDK 25. Verify
-Poudriere fetched the public release asset, verified its SHA-256, and completed
-the isolated validation before the Port is submitted.
+jCloudflareDDNS 0.1.1 is the current release candidate. Its FreeBSD Ports
+candidate includes the optional service integration and must pass the complete
+release and upgrade gates below before publication and submission.
 
 ## Stable release gates
 
@@ -33,10 +30,14 @@ the isolated validation before the Port is submitted.
   any required wrapper or sample configuration files.
 - Use the Ports Java framework and install the application below the standard
   Java share directory with a launcher below `${PREFIX}/bin`.
-- Keep configuration non-secret; do not install tokens or create a service.
+- Keep configuration non-secret. Install only an empty token-file sample and
+  preserve strict ownership and permissions for the opt-in service.
 - Pass `make stage`, `stage-qa`, `package`, `install`, `deinstall`, and
   `portlint -A`, then validate with `poudriere testport` in clean jails.
 - Run `make package` as a normal user for the frozen release artifact.
+- Verify an upgrade from 0.1.0 preserves operator configuration and tokens,
+  creates the managed lock with the expected ownership, documents the required
+  ownership migration, and does not enable or start the service automatically.
 
 The manual installer and local package builder are development tools. They are
 not substitutes for a submitted FreeBSD Port.

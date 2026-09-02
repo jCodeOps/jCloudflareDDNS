@@ -54,7 +54,7 @@ validate_archive() {
 
 validate_archive
 
-package_version=${JCDDNS_PACKAGE_VERSION:-0.1.0}
+package_version=${JCDDNS_PACKAGE_VERSION:-0.1.1}
 case "$package_version" in
     ''|*[!A-Za-z0-9.+_-]*)
         echo "Package version contains unsupported characters." >&2
