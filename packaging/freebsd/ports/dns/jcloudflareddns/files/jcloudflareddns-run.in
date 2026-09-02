@@ -1,0 +1,50 @@
+#!/bin/sh
+
+set -eu
+
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 CONFIG_FILE TOKEN_FILE" >&2
+    exit 2
+fi
+
+config_file=$1
+token_file=$2
+
+if [ ! -r "$config_file" ]; then
+    echo "Configuration file is not readable: $config_file" >&2
+    exit 1
+fi
+if [ ! -r "$token_file" ]; then
+    echo "Token file is not readable: $token_file" >&2
+    exit 1
+fi
+
+token_mode=$(stat -f '%Lp' "$token_file")
+token_permissions=$((0$token_mode))
+if [ $((token_permissions & 027)) -ne 0 ]; then
+    echo "Token file permissions are too permissive; expected 0640 or stricter." >&2
+    exit 1
+fi
+
+while IFS= read -r token_entry || [ -n "$token_entry" ]; do
+    case "$token_entry" in
+        ''|'#'*) continue ;;
+    esac
+
+    token_name=${token_entry%%=*}
+    token_value=${token_entry#*=}
+    if [ "$token_name" = "$token_entry" ] || [ -z "$token_value" ]; then
+        echo "Token file contains an invalid or empty assignment." >&2
+        exit 1
+    fi
+    case "$token_name" in
+        ''|[!A-Z_]*|*[!A-Z0-9_]*)
+            echo "Token file contains an invalid environment variable name." >&2
+            exit 1
+            ;;
+    esac
+    export "$token_name=$token_value"
+done < "$token_file"
+
+exec %%PREFIX%%/bin/jcloudflareddns update --apply --all \
+    --config "$config_file"

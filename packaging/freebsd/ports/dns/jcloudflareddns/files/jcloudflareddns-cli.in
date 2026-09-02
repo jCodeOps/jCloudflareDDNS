@@ -1,0 +1,4 @@
+#!/bin/sh
+
+exec %%JAVA%% -cp "%%APP_HOME%%/lib/*" \
+    com.proactiveidea.jcloudflareddns.JCloudflareDdnsApplication "$@"

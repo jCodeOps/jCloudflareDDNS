@@ -1,4 +1,40 @@
 #!/bin/sh
 
-exec %%JAVA%% -cp "%%APP_HOME%%/lib/*" \
-    com.proactiveidea.jcloudflareddns.JCloudflareDdnsApplication "$@"
+# PROVIDE: jcloudflareddns
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name=jcloudflareddns
+rcvar=jcloudflareddns_enable
+
+load_rc_config "$name"
+
+: ${jcloudflareddns_enable:="NO"}
+: ${jcloudflareddns_config:="%%ETCDIR%%/config.yml"}
+: ${jcloudflareddns_tokens:="%%ETCDIR%%/tokens.env"}
+: ${jcloudflareddns_interval:="300"}
+
+jcloudflareddns_prestart()
+{
+    case "$jcloudflareddns_interval" in
+        ''|*[!0-9]*)
+            warn "jcloudflareddns_interval must be an integer between 60 and 31536000."
+            return 1
+            ;;
+    esac
+    if [ "$jcloudflareddns_interval" -lt 60 ] \
+        || [ "$jcloudflareddns_interval" -gt 31536000 ]; then
+        warn "jcloudflareddns_interval must be between 60 and 31536000 seconds."
+        return 1
+    fi
+}
+
+pidfile="/var/run/${name}.pid"
+command=/usr/sbin/daemon
+command_args="-S -T ${name} -s notice -P ${pidfile} -R ${jcloudflareddns_interval} -u jcloudflareddns %%PREFIX%%/libexec/jcloudflareddns-run ${jcloudflareddns_config} ${jcloudflareddns_tokens}"
+required_files="${jcloudflareddns_config} ${jcloudflareddns_tokens}"
+start_precmd=jcloudflareddns_prestart
+
+run_rc_command "$1"

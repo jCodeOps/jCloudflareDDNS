@@ -26,11 +26,13 @@ GitHub Actions continuously verifies the Maven build and portable archive on Lin
 
 Before a release, validate on a supported FreeBSD VM:
 
-- JDK 25 is available and `./mvnw --version` reports Maven 3.9.11.
+- JDK 25 is available and `./mvnw --version` reports Maven 3.9.16.
 - `./mvnw clean verify` passes.
 - `--help`, `--version`, `check`, `update`, and `validate` return the documented exit codes.
 - Configuration paths work with absolute and relative POSIX paths.
 - No API Token or other secret appears in output or error messages.
+- The optional `rc.d` supervisor starts, reports status, writes safe output to
+  syslog, runs as `jcloudflareddns`, and stops without leaving a JVM running.
 
 ## Linux validation checklist
 

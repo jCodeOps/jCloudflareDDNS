@@ -5,6 +5,9 @@ All notable changes to jCloudflareDDNS will be documented here.
 ## Unreleased
 
 - Started 0.1.1-SNAPSHOT development after the 0.1.0 stable release.
+- Added an opt-in FreeBSD `rc.d` supervisor with an unprivileged service
+  account, separated token file, bounded execution interval, syslog output,
+  and package-managed configuration permissions.
 
 ## 0.1.0 - 2026-09-02
 
