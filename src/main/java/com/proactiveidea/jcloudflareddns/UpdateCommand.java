@@ -134,7 +134,7 @@ public final class UpdateCommand implements Callable<Integer> {
                         + ipVersion.recordType() + " content: " + record.content());
                 return ExitCodes.API_ERROR;
             }
-            if (publicIp.value().equals(recordIp.value())) {
+            if (recordMatchesConfiguration(record, recordIp, publicIp, configuration)) {
                 output(profileName, "DNS record is already up to date: " + publicIp.value());
                 return ExitCodes.SUCCESS;
             }
@@ -166,6 +166,13 @@ public final class UpdateCommand implements Callable<Integer> {
             errorOut(profileName, "Unable to process IP data: " + exception.getMessage());
             return ExitCodes.API_ERROR;
         }
+    }
+
+    private static boolean recordMatchesConfiguration(
+            DnsRecord record, IpAddress recordIp, IpAddress publicIp, Configuration configuration) {
+        return publicIp.value().equals(recordIp.value())
+                && configuration.ttl().equals(record.ttl())
+                && configuration.proxied().equals(record.proxied());
     }
 
     private void output(String profileName, String message) {

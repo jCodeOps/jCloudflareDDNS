@@ -94,6 +94,16 @@ class UpdateCommandTest {
     }
 
     @Test
+    void updatesTheRecordWhenTheProxySettingDiffers() throws Exception {
+        RecordingCloudflareClient cloudflare = new RecordingCloudflareClient("198.51.100.11", 300, true);
+        CliResult result = execute(configuration(), cloudflare, false);
+
+        assertEquals(ExitCodes.SUCCESS, result.exitCode());
+        assertEquals(1, cloudflare.updateCalls);
+        assertTrue(!cloudflare.lastUpdate.proxied());
+    }
+
+    @Test
     void doesNotUpdateWhenCloudflareRecordContentIsInvalid() throws Exception {
         RecordingCloudflareClient cloudflare = new RecordingCloudflareClient("not-an-ip-address");
         CliResult result = execute(configuration(), cloudflare, false);
@@ -218,11 +228,19 @@ class UpdateCommandTest {
     private static final class RecordingCloudflareClient implements CloudflareApiClient {
 
         private final String currentContent;
+        private final int ttl;
+        private final boolean proxied;
         private int updateCalls;
         private DnsRecordUpdate lastUpdate;
 
         private RecordingCloudflareClient(String currentContent) {
+            this(currentContent, 300, false);
+        }
+
+        private RecordingCloudflareClient(String currentContent, int ttl, boolean proxied) {
             this.currentContent = currentContent;
+            this.ttl = ttl;
+            this.proxied = proxied;
         }
 
         @Override
@@ -232,7 +250,7 @@ class UpdateCommandTest {
 
         @Override
         public List<DnsRecord> listRecords(String zoneId, String name, String type) {
-            return List.of(new DnsRecord("record-id", name, type, currentContent, 120, false));
+            return List.of(new DnsRecord("record-id", name, type, currentContent, ttl, proxied));
         }
 
         @Override

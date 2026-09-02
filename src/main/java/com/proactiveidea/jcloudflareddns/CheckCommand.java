@@ -123,12 +123,15 @@ public final class CheckCommand implements Callable<Integer> {
                         + ipVersion.recordType() + " content: " + record.content());
                 return ExitCodes.API_ERROR;
             }
-            if (publicIp.value().equals(recordIp.value())) {
+            if (recordMatchesConfiguration(record, recordIp, publicIp, configuration)) {
                 output(profileName, "DNS record is up to date: " + publicIp.value());
                 return ExitCodes.SUCCESS;
             }
             output(profileName, "DNS record differs. Public IP: " + publicIp.value()
-                    + "; DNS record: " + record.content());
+                    + "; DNS record: " + record.content()
+                    + "; configured TTL: " + configuration.ttl() + "; DNS TTL: " + record.ttl()
+                    + "; configured proxied: " + configuration.proxied()
+                    + "; DNS proxied: " + record.proxied());
             return ExitCodes.FAILURE;
         } catch (AuthenticationException exception) {
             errorOut(profileName, "Authentication error: " + exception.getMessage());
@@ -147,6 +150,13 @@ public final class CheckCommand implements Callable<Integer> {
             errorOut(profileName, "Unable to process IP data: " + exception.getMessage());
             return ExitCodes.API_ERROR;
         }
+    }
+
+    private static boolean recordMatchesConfiguration(
+            DnsRecord record, IpAddress recordIp, IpAddress publicIp, Configuration configuration) {
+        return publicIp.value().equals(recordIp.value())
+                && configuration.ttl().equals(record.ttl())
+                && configuration.proxied().equals(record.proxied());
     }
 
     private void output(String profileName, String message) {

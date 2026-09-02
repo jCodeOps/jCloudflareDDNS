@@ -74,6 +74,16 @@ class CheckCommandTest {
     }
 
     @Test
+    void reportsFailureWhenTheProxySettingDiffers() throws Exception {
+        CliResult result = execute(new DnsRecord(
+                "record-id", "host.example.com", "A", "198.51.100.11", 300, false));
+
+        assertEquals(ExitCodes.FAILURE, result.exitCode());
+        assertTrue(result.stdout().contains("configured proxied: true"));
+        assertTrue(result.stdout().contains("DNS proxied: false"));
+    }
+
+    @Test
     void identifiesInvalidCloudflareRecordContent() throws Exception {
         CliResult result = execute("not-an-ip-address");
 
@@ -83,6 +93,10 @@ class CheckCommandTest {
     }
 
     private CliResult execute(String currentContent) throws Exception {
+        return execute(new DnsRecord("record-id", "host.example.com", "A", currentContent, 300, true));
+    }
+
+    private CliResult execute(DnsRecord record) throws Exception {
         Path config = Files.writeString(temporaryDirectory.resolve("config.yml"), """
                 zone: example.com
                 record: host.example.com
@@ -95,7 +109,7 @@ class CheckCommandTest {
         ByteArrayOutputStream stdout = new ByteArrayOutputStream();
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
 
-        int exitCode = new CommandLine(new CheckCommand(resolver, new StaticCloudflareClient(currentContent)))
+        int exitCode = new CommandLine(new CheckCommand(resolver, new StaticCloudflareClient(record)))
                 .setOut(new PrintWriter(stdout, true))
                 .setErr(new PrintWriter(stderr, true))
                 .execute("--config", config.toString());
@@ -118,10 +132,10 @@ class CheckCommandTest {
 
     private static final class StaticCloudflareClient implements CloudflareApiClient {
 
-        private final String currentContent;
+        private final DnsRecord record;
 
-        private StaticCloudflareClient(String currentContent) {
-            this.currentContent = currentContent;
+        private StaticCloudflareClient(DnsRecord record) {
+            this.record = record;
         }
 
         @Override
@@ -131,7 +145,7 @@ class CheckCommandTest {
 
         @Override
         public List<DnsRecord> listRecords(String zoneId, String name, String type) {
-            return List.of(new DnsRecord("record-id", name, type, currentContent, 300, false));
+            return List.of(record);
         }
 
         @Override
