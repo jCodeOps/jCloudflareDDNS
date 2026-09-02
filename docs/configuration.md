@@ -44,8 +44,8 @@ Run validation without making network or Cloudflare requests:
 
 ```sh
 ./mvnw package
-tar -xzf target/jcloudflareddns-0.1.0-RC1-distribution.tar.gz
-./jcloudflareddns-0.1.0-RC1/bin/jcloudflareddns validate --config config.yml
+tar -xzf target/jcloudflareddns-0.1.0-distribution.tar.gz
+./jcloudflareddns-0.1.0/bin/jcloudflareddns validate --config config.yml
 ```
 
 ## Retry behavior

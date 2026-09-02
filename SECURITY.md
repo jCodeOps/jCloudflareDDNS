@@ -19,4 +19,5 @@ with the normal Maven verification and distribution checks before merging.
 
 ## Supported versions
 
-No stable release exists yet. Security support and a formal supported-version policy will be established before the first stable release.
+After publication, only the latest stable release is supported with security
+fixes. Development builds and release candidates are not supported releases.

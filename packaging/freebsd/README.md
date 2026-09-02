@@ -11,14 +11,14 @@ The distribution archive includes a POSIX launcher under `bin/`. It is suitable 
 `install.sh` provides manual installation. It requires root, accepts an optional prefix, refuses to overwrite existing files, and installs no service definition. Example:
 
 ```sh
-sh packaging/freebsd/install.sh jcloudflareddns-0.1.0-RC1-distribution.tar.gz /usr/local
+sh packaging/freebsd/install.sh jcloudflareddns-0.1.0-distribution.tar.gz /usr/local
 ```
 
 `create-package.sh` creates a FreeBSD `.pkg` archive from the distribution. It requires the FreeBSD `pkg` command and does not install anything or create a service:
 
 ```sh
 sh packaging/freebsd/create-package.sh \
-    jcloudflareddns-0.1.0-RC1-distribution.tar.gz packages
+    jcloudflareddns-0.1.0-distribution.tar.gz packages
 pkg add packages/jcloudflareddns-0.1.0.pkg
 ```
 

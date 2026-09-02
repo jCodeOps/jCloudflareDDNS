@@ -1,8 +1,8 @@
 PORTNAME=	jcloudflareddns
-DISTVERSION=	0.1.0.r1
+DISTVERSION=	0.1.0
 CATEGORIES=	dns java
-MASTER_SITES=	https://github.com/jCodeOps/jCloudflareDDNS/releases/download/v0.1.0-RC1/
-DISTNAME=	${PORTNAME}-0.1.0-RC1-distribution
+MASTER_SITES=	https://github.com/jCodeOps/jCloudflareDDNS/releases/download/v0.1.0/
+DISTNAME=	${PORTNAME}-0.1.0-distribution
 
 MAINTAINER=	jcabrerav@proactiveidea.com
 COMMENT=	Secure, lightweight Cloudflare Dynamic DNS client
@@ -17,7 +17,7 @@ JAVA_VERSION=	25
 NO_ARCH=	yes
 NO_BUILD=	yes
 
-WRKSRC=		${WRKDIR}/${PORTNAME}-0.1.0-RC1
+WRKSRC=		${WRKDIR}/${PORTNAME}-0.1.0
 SUB_FILES=	jcloudflareddns
 SUB_LIST=	APP_HOME=${JAVASHAREDIR}/${PORTNAME} \
 		JAVA=${JAVA}
