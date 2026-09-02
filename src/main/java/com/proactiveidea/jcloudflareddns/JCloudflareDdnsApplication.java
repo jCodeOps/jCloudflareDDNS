@@ -21,7 +21,7 @@ import picocli.CommandLine;
  */
 public final class JCloudflareDdnsApplication {
 
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.1.1-SNAPSHOT";
     public static final String BUG_REPORT_EMAIL = "jcabrerav@proactiveidea.com";
     public static final String PROJECT_URL = "https://github.com/jCodeOps/jCloudflareDDNS";
 

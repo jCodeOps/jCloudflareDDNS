@@ -2,12 +2,12 @@
 
 ## Current status
 
-jCloudflareDDNS 0.1.0 is prepared locally but has not been published. Its
-FreeBSD Ports candidate passed `make stage`, `stage-qa`, `check-plist`,
-`package`, `install`, `deinstall`, `portlint -A`, and `poudriere testport` on
-FreeBSD 15.1-RELEASE-p3 with OpenJDK 25. The exact archive was preloaded for
-the isolated Poudriere validation because its public release asset does not
-exist yet.
+jCloudflareDDNS 0.1.0 was published on 2026-09-02 with immutable release
+assets and SHA-256 checksums. Its FreeBSD Ports candidate passed `make stage`,
+`stage-qa`, `check-plist`, `package`, `install`, `deinstall`, `portlint -A`,
+and `poudriere testport` on FreeBSD 15.1-RELEASE-p3 with OpenJDK 25. Verify
+Poudriere fetched the public release asset, verified its SHA-256, and completed
+the isolated validation before the Port is submitted.
 
 ## Stable release gates
 

@@ -17,7 +17,7 @@ cd jCloudflareDDNS
 ./mvnw package
 ```
 
-After extracting the generated `target/jcloudflareddns-0.1.0-distribution.tar.gz`, run `bin/jcloudflareddns --help` from the extracted directory. The launcher uses `JAVA_HOME` when set, otherwise it resolves `java` from `PATH`.
+After extracting the generated `target/jcloudflareddns-*-distribution.tar.gz`, run `bin/jcloudflareddns --help` from the extracted directory. The launcher uses `JAVA_HOME` when set, otherwise it resolves `java` from `PATH`.
 
 The current distribution has been smoke-tested on FreeBSD 15.1-RELEASE-p3
 amd64 with OpenJDK 25.0.3. Stable support will require repeatable validation
@@ -26,7 +26,7 @@ across the documented release workflow.
 For a published release, verify the archive against the official SHA-256 value before running any installer as root. For a FreeBSD installation under a chosen prefix, run the repository installer as root:
 
 ```sh
-sh packaging/freebsd/install.sh target/jcloudflareddns-0.1.0-distribution.tar.gz /usr/local
+sh packaging/freebsd/install.sh target/jcloudflareddns-*-distribution.tar.gz /usr/local
 ```
 
 The installer refuses to overwrite an existing version or launcher. It validates the archive layout, installs it under `share/`, creates a launcher under `bin/`, and creates an empty configuration directory with restrictive permissions. It never creates or copies a configuration file or API Token.
