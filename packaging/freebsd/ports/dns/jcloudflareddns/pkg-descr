@@ -8,6 +8,7 @@ from the environment variable named by the configuration. The application
 supports multiple profiles, bounded retries, and one-shot sequential or
 parallel execution.
 
-This port installs the Java application and its runtime dependencies. It does
-not install a daemon, service definition, scheduler, configuration file, or
+This port installs the Java application, its runtime dependencies, sample
+configuration files, and an optional rc.d supervisor. The service is disabled
+by default, runs as a dedicated unprivileged account, and does not install
 credentials.

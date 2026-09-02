@@ -1,7 +1,6 @@
 # jCloudflareDDNS
 
-> Stable release — [0.1.0](https://github.com/jCodeOps/jCloudflareDDNS/releases/tag/v0.1.0)
-> is available. Development now targets 0.1.1-SNAPSHOT.
+> Current release — [0.1.1](https://github.com/jCodeOps/jCloudflareDDNS/releases/tag/v0.1.1).
 
 jCloudflareDDNS is planned as a secure, lightweight, cross-platform Dynamic DNS client for Cloudflare, written in modern Java. It will focus on updating Cloudflare DNS records safely when a host's public IP changes, while keeping configuration explicit and credentials protected.
 

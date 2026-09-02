@@ -6,7 +6,7 @@ bin/jcloudflareddns
 %%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-core-2.22.2.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-databind-2.22.2.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/jackson-dataformat-yaml-2.22.2.jar
-%%JAVASHAREDIR%%/jcloudflareddns/lib/jcloudflareddns-0.1.0.jar
+%%JAVASHAREDIR%%/jcloudflareddns/lib/jcloudflareddns-0.1.1.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/picocli-4.7.7.jar
 %%JAVASHAREDIR%%/jcloudflareddns/lib/snakeyaml-2.5.jar
 libexec/jcloudflareddns-run

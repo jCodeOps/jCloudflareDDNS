@@ -11,21 +11,21 @@ The distribution archive includes a POSIX launcher under `bin/`. It is suitable 
 `install.sh` provides manual installation. It requires root, accepts an optional prefix, refuses to overwrite existing files, and installs no service definition. Example:
 
 ```sh
-sh packaging/freebsd/install.sh jcloudflareddns-0.1.0-distribution.tar.gz /usr/local
+sh packaging/freebsd/install.sh jcloudflareddns-0.1.1-distribution.tar.gz /usr/local
 ```
 
 `create-package.sh` creates a FreeBSD `.pkg` archive from the distribution. It requires the FreeBSD `pkg` command and does not install anything or create a service:
 
 ```sh
 sh packaging/freebsd/create-package.sh \
-    jcloudflareddns-0.1.0-distribution.tar.gz packages
-pkg add packages/jcloudflareddns-0.1.0.pkg
+    jcloudflareddns-0.1.1-distribution.tar.gz packages
+pkg add packages/jcloudflareddns-0.1.1.pkg
 ```
 
 The package requires Java 25, installs the launcher under `/usr/local/bin`, and keeps the versioned application under `/usr/local/share`.
 Both FreeBSD scripts verify that the archive has the expected single-root layout before extracting it.
 
-`ports/dns/jcloudflareddns` contains the 0.1.0 candidate for the FreeBSD Ports
+`ports/dns/jcloudflareddns` contains the 0.1.1 candidate for the FreeBSD Ports
 Collection. It packages the portable archive as a Java application and does not
 use these development scripts. Its optional service uses FreeBSD `daemon(8)` to
 run the one-shot CLI every 300 seconds by default; it does not keep a JVM alive.

@@ -6,7 +6,7 @@
 
     <groupId>com.proactiveidea</groupId>
     <artifactId>jcloudflareddns</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
     <name>jCloudflareDDNS</name>
     <description>A secure, lightweight, cross-platform Cloudflare Dynamic DNS client written in modern Java.</description>
     <url>https://github.com/jCodeOps/jCloudflareDDNS</url>
