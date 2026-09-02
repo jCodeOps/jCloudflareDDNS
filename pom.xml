@@ -6,7 +6,7 @@
 
     <groupId>com.proactiveidea</groupId>
     <artifactId>jcloudflareddns</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <name>jCloudflareDDNS</name>
     <description>A secure, lightweight, cross-platform Cloudflare Dynamic DNS client written in modern Java.</description>
     <url>https://github.com/jCodeOps/jCloudflareDDNS</url>
@@ -76,7 +76,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
+                <version>3.15.0</version>
                 <configuration>
                     <release>${maven.compiler.release}</release>
                     <showWarnings>${maven.compiler.showWarnings}</showWarnings>
@@ -89,7 +89,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.5.6</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
                 </configuration>
@@ -115,7 +115,7 @@
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.9.2</version>
+                <version>2.9.3</version>
                 <executions>
                     <execution>
                         <id>create-sbom</id>
@@ -138,7 +138,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.7.1</version>
+                <version>3.8.0</version>
                 <configuration>
                     <descriptors>
                         <descriptor>src/assembly/distribution.xml</descriptor>

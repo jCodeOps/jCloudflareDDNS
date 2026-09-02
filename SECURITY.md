@@ -19,5 +19,6 @@ with the normal Maven verification and distribution checks before merging.
 
 ## Supported versions
 
-After publication, only the latest stable release is supported with security
-fixes. Development builds and release candidates are not supported releases.
+Version 0.1.0 is currently supported with security fixes. Development builds
+and release candidates are not supported releases. After a future stable
+release, only the latest stable release will be supported.

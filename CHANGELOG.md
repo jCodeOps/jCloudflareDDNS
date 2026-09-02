@@ -2,6 +2,10 @@
 
 All notable changes to jCloudflareDDNS will be documented here.
 
+## Unreleased
+
+- Started 0.1.1-SNAPSHOT development after the 0.1.0 stable release.
+
 ## 0.1.0 - 2026-09-02
 
 - Rejected negative IPv4 octets during public IP and DNS record validation.
